@@ -791,7 +791,7 @@ CATS.All=['All'].concat(...DIVS.slice(1).map(d=>CATS[d.id].slice(1)));
 /* price = unit price (or tier-1 price for wholesale) */
 const PRODUCTS = [
  // PHARMACY · photos in img/ + img/app/
- {id:'p1',div:'Pharmacy',cat:'Pain & fever',name:'Panadol Extra Tablets',pack:'Pack of 100',price:780,old:920,brand:'Panadol',img:'img/app/panadol-extra.jpg',fit:'cover',stock:60},
+ {id:'p1',div:'Pharmacy',cat:'Pain & fever',name:'Panadol Extra Tablets',pack:'Pack of 100',price:780,old:920,brand:'Panadol',img:'img/app/panadol-extra.jpg',fit:'cover',weak:1,stock:60},
  {id:'p2',div:'Pharmacy',cat:'Pain & fever',name:'Ibuprofen 400mg Tablets',pack:'Pack of 30',price:280,old:null,brand:'Generic',img:'img/app/ibuprofen-400mg.jpg',fit:'cover',stock:40},
  {id:'p3',div:'Pharmacy',cat:'Pain & fever',name:'Deep Heat Pain Relief Spray',pack:'150 ml',price:920,old:null,brand:'Deep Heat',img:'img/app/deep-heat-pain-spray.jpg',fit:'cover',stock:25},
  {id:'p4',div:'Pharmacy',cat:'Cold & flu',name:'Vicks VapoRub',pack:'100 g jar',price:450,old:520,brand:'Vicks',img:'img/vicks.jpg',stock:35},
@@ -812,35 +812,35 @@ const PRODUCTS = [
  {id:'p19',div:'Pharmacy',cat:'First aid',name:'Betadine Antiseptic Solution',pack:'100 ml',price:460,old:null,brand:'Betadine',img:'img/app/betadine-antiseptic.jpg',fit:'cover',stock:28},
  {id:'p20',div:'Pharmacy',cat:'First aid',name:'Hansaplast Elastic Strips',pack:'Pack of 20',price:260,old:null,brand:'Hansaplast',img:'img/app/hansaplast-elastic-strips.jpg',fit:'cover',stock:45},
  {id:'p21',div:'Pharmacy',cat:'First aid',name:'Sterile Gauze Swabs',pack:'Pack of 10',price:300,old:null,brand:'Generic',img:'img/app/sterile-gauze-swabs.jpg',fit:'cover',stock:38},
- {id:'p22',div:'Pharmacy',cat:'First aid',name:'Hand Sanitizer Gel',pack:'500 ml',price:350,old:null,brand:'Generic',img:'img/hand-sanitizer.jpg',stock:50},
- {id:'p23',div:'Pharmacy',cat:'Personal care',name:'Durex Classic',pack:'Pack of 12',price:850,old:null,brand:'Durex',img:'img/durex.jpg',fit:'cover',stock:33},
+ {id:'p22',div:'Pharmacy',cat:'First aid',name:'Hand Sanitizer Gel',pack:'500 ml',price:350,old:null,brand:'Generic',img:'img/hand-sanitizer.jpg',weak:1,stock:50},
+ {id:'p23',div:'Pharmacy',cat:'Personal care',name:'Durex Classic',pack:'Pack of 12',price:850,old:null,brand:'Durex',img:'img/durex.jpg',fit:'cover',weak:1,stock:33},
  {id:'p24',div:'Pharmacy',cat:'Personal care',name:'Sensodyne Rapid Relief',pack:'75 ml',price:640,old:null,brand:'Sensodyne',img:'img/app/sensodyne-rapid-relief.jpg',fit:'cover',stock:29},
  {id:'p25',div:'Pharmacy',cat:'Antibiotics',name:'Amoxicillin 500mg Capsules',pack:'Pack of 21',price:480,old:null,brand:'Generic',img:'img/amoxicillin.jpg',fit:'cover',stock:18,rx:true},
  // RETAIL · photos in img/ + img/app/
- {id:'s1',div:'Retail',cat:'Staples',name:'Festive Bread',pack:'800 g loaf',price:210,old:null,brand:'Festive',img:'img/bread-festive.jpg',fit:'cover',pos:'center 40%',stock:90},
- {id:'s2',div:'Retail',cat:'Staples',name:'Weetabix Cereal',pack:'24 biscuits',price:550,old:null,brand:'Weetabix',img:'img/weetabix.jpg',fit:'cover',stock:60},
- {id:'s3',div:'Retail',cat:'Staples',name:'Zesta Strawberry Jam',pack:'500 g',price:400,old:null,brand:'Zesta',img:'img/jam-zesta.jpg',fit:'cover',pos:'center 25%',stock:55},
- {id:'s4',div:'Retail',cat:'Staples',name:'Spago Spaghetti',pack:'500 g',price:210,old:null,brand:'Spago',img:'img/pasta-spago.jpg',fit:'cover',pos:'center 10%',stock:70},
+ {id:'s1',div:'Retail',cat:'Staples',name:'Festive Bread',pack:'800 g loaf',price:210,old:null,brand:'Festive',img:'img/bread-festive.jpg',fit:'cover',pos:'center 40%',weak:1,stock:90},
+ {id:'s2',div:'Retail',cat:'Staples',name:'Weetabix Cereal',pack:'24 biscuits',price:550,old:null,brand:'Weetabix',img:'img/weetabix.jpg',fit:'cover',weak:1,stock:60},
+ {id:'s3',div:'Retail',cat:'Staples',name:'Zesta Strawberry Jam',pack:'500 g',price:400,old:null,brand:'Zesta',img:'img/jam-zesta.jpg',fit:'cover',pos:'center 25%',weak:1,stock:55},
+ {id:'s4',div:'Retail',cat:'Staples',name:'Spago Spaghetti',pack:'500 g',price:210,old:null,brand:'Spago',img:'img/pasta-spago.jpg',fit:'cover',pos:'center 10%',weak:1,stock:70},
  {id:'s5',div:'Retail',cat:'Staples',name:'Pishori Rice',pack:'5 kg bag',price:780,old:890,brand:'Xana Staples',img:'img/app/rice-grains.jpg',fit:'cover',stock:60},
  {id:'s6',div:'Retail',cat:'Staples',name:'White Sugar',pack:'2 kg',price:310,old:null,brand:'Xana Staples',img:'img/placeholder/sugar-2kg.jpg',stock:95},
  {id:'s7',div:'Retail',cat:'Staples',name:'Pure Acacia Honey',pack:'500 g',price:780,old:null,brand:'Xana',img:'img/app/pure-acacia-honey.jpg',fit:'cover',stock:30},
- {id:'s8',div:'Retail',cat:'Cooking',name:'Royco Mchuzi Mix',pack:'200 g',price:250,old:null,brand:'Royco',img:'img/royco-mchuzi.jpg',fit:'cover',pos:'center 45%',stock:85},
- {id:'s9',div:'Retail',cat:'Cooking',name:'Knorr Soup Mix',pack:'2 × 50 g',price:160,old:null,brand:'Knorr',img:'img/soup-knorr.jpg',fit:'cover',stock:75},
- {id:'s10',div:'Retail',cat:'Cooking',name:'Prestige Margarine',pack:'1 kg tub',price:510,old:null,brand:'Prestige',img:'img/margarine-prestige.jpg',fit:'cover',stock:65},
- {id:'s11',div:'Retail',cat:'Cooking',name:'Kentaste Coconut Oil',pack:'1 L',price:980,old:null,brand:'Kentaste',img:'img/coconut-oil-kentaste.jpg',fit:'cover',pos:'center 15%',stock:40},
+ {id:'s8',div:'Retail',cat:'Cooking',name:'Royco Mchuzi Mix',pack:'200 g',price:250,old:null,brand:'Royco',img:'img/royco-mchuzi.jpg',fit:'cover',pos:'center 45%',weak:1,stock:85},
+ {id:'s9',div:'Retail',cat:'Cooking',name:'Knorr Soup Mix',pack:'2 × 50 g',price:160,old:null,brand:'Knorr',img:'img/soup-knorr.jpg',fit:'cover',weak:1,stock:75},
+ {id:'s10',div:'Retail',cat:'Cooking',name:'Prestige Margarine',pack:'1 kg tub',price:510,old:null,brand:'Prestige',img:'img/margarine-prestige.jpg',fit:'cover',weak:1,stock:65},
+ {id:'s11',div:'Retail',cat:'Cooking',name:'Kentaste Coconut Oil',pack:'1 L',price:980,old:null,brand:'Kentaste',img:'img/coconut-oil-kentaste.jpg',fit:'cover',pos:'center 15%',weak:1,stock:40},
  {id:'s12',div:'Retail',cat:'Cooking',name:'Vegetable Cooking Oil',pack:'3 L jerrycan',price:960,old:1090,brand:'Xana Gold',img:'img/app/cooking-oil.jpg',fit:'cover',stock:80},
  {id:'s13',div:'Retail',cat:'Dairy & eggs',name:'Bio Whole Milk',pack:'500 ml',price:85,old:null,brand:'Bio',img:'img/placeholder/milk-carton.jpg',stock:100},
  {id:'s14',div:'Retail',cat:'Dairy & eggs',name:'Brookside Fresh Milk Pouch',pack:'500 ml pouch',price:65,old:null,brand:'Brookside',img:'img/app/brookside-whole-fresh-milk-500ml-pouch.jpg',fit:'cover',stock:120},
- {id:'s15',div:'Retail',cat:'Dairy & eggs',name:'Brookside Butter',pack:'500 g',price:780,old:null,brand:'Brookside',img:'img/butter-brookside.jpg',fit:'cover',stock:45},
- {id:'s16',div:'Retail',cat:'Dairy & eggs',name:'Delamere Yoghurt',pack:'500 ml',price:300,old:null,brand:'Delamere',img:'img/yoghurt-delamere.jpg',fit:'cover',pos:'center 30%',stock:50},
- {id:'s17',div:'Retail',cat:'Beverages',name:'Fahari Ya Kenya Tea',pack:'500 g',price:480,old:null,brand:'Fahari',img:'img/tea-fahari.jpg',fit:'cover',stock:65},
- {id:'s18',div:'Retail',cat:'Beverages',name:'Sprite',pack:'2 L bottle',price:260,old:null,brand:'Sprite',img:'img/sprite.jpg',fit:'cover',pos:'center 60%',stock:80},
- {id:'s19',div:'Retail',cat:'Beverages',name:'Pepsi',pack:'2 L bottle',price:260,old:null,brand:'Pepsi',img:'img/pepsi.jpg',fit:'cover',stock:80},
- {id:'s20',div:'Retail',cat:'Beverages',name:'Dasani Water',pack:'1 L bottle',price:110,old:null,brand:'Dasani',img:'img/dasani.jpg',fit:'cover',stock:110},
- {id:'s21',div:'Retail',cat:'Beverages',name:'Minute Maid Mango',pack:'1 L',price:320,old:null,brand:'Minute Maid',img:'img/minute-maid.jpg',fit:'cover',stock:60},
+ {id:'s15',div:'Retail',cat:'Dairy & eggs',name:'Brookside Butter',pack:'500 g',price:780,old:null,brand:'Brookside',img:'img/butter-brookside.jpg',fit:'cover',weak:1,stock:45},
+ {id:'s16',div:'Retail',cat:'Dairy & eggs',name:'Delamere Yoghurt',pack:'500 ml',price:300,old:null,brand:'Delamere',img:'img/yoghurt-delamere.jpg',fit:'cover',pos:'center 30%',weak:1,stock:50},
+ {id:'s17',div:'Retail',cat:'Beverages',name:'Fahari Ya Kenya Tea',pack:'500 g',price:480,old:null,brand:'Fahari',img:'img/tea-fahari.jpg',fit:'cover',weak:1,stock:65},
+ {id:'s18',div:'Retail',cat:'Beverages',name:'Sprite',pack:'2 L bottle',price:260,old:null,brand:'Sprite',img:'img/sprite.jpg',fit:'cover',pos:'center 60%',weak:1,stock:80},
+ {id:'s19',div:'Retail',cat:'Beverages',name:'Pepsi',pack:'2 L bottle',price:260,old:null,brand:'Pepsi',img:'img/pepsi.jpg',fit:'cover',weak:1,stock:80},
+ {id:'s20',div:'Retail',cat:'Beverages',name:'Dasani Water',pack:'1 L bottle',price:110,old:null,brand:'Dasani',img:'img/dasani.jpg',fit:'cover',weak:1,stock:110},
+ {id:'s21',div:'Retail',cat:'Beverages',name:'Minute Maid Mango',pack:'1 L',price:320,old:null,brand:'Minute Maid',img:'img/minute-maid.jpg',fit:'cover',weak:1,stock:60},
  {id:'s22',div:'Retail',cat:'Household',name:'Omo Hand Washing Powder',pack:'1 kg',price:410,old:null,brand:'Omo',img:'img/app/wholesale-pack-2.jpg',fit:'cover',stock:70},
- {id:'s23',div:'Retail',cat:'Household',name:'Harpic Power Bleach',pack:'1 kg',price:330,old:null,brand:'Harpic',img:'img/app/harpic-power-bleach-detergent-1kg.jpg',stock:62},
- {id:'s24',div:'Retail',cat:'Snacks',name:'Java Cookies',pack:'400 g',price:380,old:null,brand:'Java',img:'img/cookies-java.jpg',fit:'cover',pos:'center 15%',stock:48},
+ {id:'s23',div:'Retail',cat:'Household',name:'Harpic Power Bleach',pack:'1 kg',price:330,old:null,brand:'Harpic',img:'img/app/harpic-power-bleach-detergent-1kg.jpg',weak:1,stock:62},
+ {id:'s24',div:'Retail',cat:'Snacks',name:'Java Cookies',pack:'400 g',price:380,old:null,brand:'Java',img:'img/cookies-java.jpg',fit:'cover',pos:'center 15%',weak:1,stock:48},
  {id:'s25',div:'Retail',cat:'Fresh produce',name:'Fresh Hass Avocados',pack:'Pack of 4',price:200,old:null,brand:'Xana Fresh',img:'img/app/fresh-hass-avocados.jpg',fit:'cover',stock:52},
  {id:'s26',div:'Retail',cat:'Fresh produce',name:'Fresh Sukuma Wiki',pack:'1 kg bunch',price:80,old:null,brand:'Xana Fresh',img:'img/app/fresh-sukuma-wiki.jpg',fit:'cover',stock:90},
  {id:'s27',div:'Retail',cat:'Meat',name:'Farmers Choice Beef Sausages',pack:'500 g',price:540,old:null,brand:'Farmers Choice',img:'img/app/farmers-choice-beef-sausages.jpg',fit:'cover',stock:42},
@@ -857,10 +857,10 @@ const PRODUCTS = [
  {id:'w4',div:'Wholesale',cat:'Bulk rice',name:'Pishori Rice Bag',pack:'25 kg bag',price:3650,old:3900,brand:'Xana Trade',img:'img/app/rice-grains.jpg',fit:'cover',stock:80,tiers:[{l:'1–4 bags',p:3650},{l:'5–19 bags',p:3520},{l:'20+ bags',p:3380}]},
  {id:'w5',div:'Wholesale',cat:'Bulk flour',name:'Wheat Flour Bale · 2kg units',pack:'Bale of 6 × 2 kg',price:1080,old:null,brand:'Xana Trade',tint:'#FFF6DB',stock:160,tiers:[{l:'1–4 bales',p:1080},{l:'5–19 bales',p:1030},{l:'20+ bales',p:980}]},
  {id:'w6',div:'Wholesale',cat:'Bulk household',name:'Toilet Tissue Bale',pack:'Bale of 40 rolls',price:1980,old:2150,brand:'Xana Trade',tint:'#EFEFE2',stock:100,tiers:[{l:'1–4 bales',p:1980},{l:'5–19 bales',p:1890},{l:'20+ bales',p:1790}]},
- {id:'w7',div:'Wholesale',cat:'Bulk household',name:'Duka Starter Pack · Mixed Staples',pack:'Staples variety box',price:4500,old:null,brand:'Xana Trade',img:'img/app/wholesale-pack-1.jpg',fit:'cover',stock:60,tiers:[{l:'1–4 boxes',p:4500},{l:'5–19 boxes',p:4320},{l:'20+ boxes',p:4100}]},
+ {id:'w7',div:'Wholesale',cat:'Bulk household',name:'Duka Starter Pack · Mixed Staples',pack:'Staples variety box',price:4500,old:null,brand:'Xana Trade',img:'img/app/wholesale-pack-1.jpg',fit:'cover',weak:1,stock:60,tiers:[{l:'1–4 boxes',p:4500},{l:'5–19 boxes',p:4320},{l:'20+ boxes',p:4100}]},
  // WINES & SPIRITS
  {id:'v1',div:'Liquor',cat:'Wine',name:'Dry Red Wine · House Reserve',pack:'750 ml bottle',price:1450,old:null,brand:'Reserve',img:'img/red-wine.jpg',stock:30,age:true},
- {id:'v2',div:'Liquor',cat:'Beer & cider',name:'Tusker Lager',pack:'6 × 500 ml',price:1380,old:null,brand:'Tusker',img:'img/tusker.jpg',stock:60,age:true},
+ {id:'v2',div:'Liquor',cat:'Beer & cider',name:'Tusker Lager',pack:'6 × 500 ml',price:1380,old:null,brand:'Tusker',img:'img/tusker.jpg',weak:1,stock:60,age:true},
  {id:'v3',div:'Liquor',cat:'Spirits',name:'Kenya Cane',pack:'750 ml bottle',price:1650,old:null,brand:'Kenya Cane',img:'img/kenya-cane.png',stock:28,age:true},
  {id:'v4',div:'Liquor',cat:'Spirits',name:"Gilbey's Gin",pack:'1 L bottle',price:2200,old:null,brand:"Gilbey's",img:'img/gilbeys-gin.jpg',stock:20,age:true},
  {id:'v5',div:'Liquor',cat:'Spirits',name:'Smirnoff Vodka',pack:'1 L bottle',price:2450,old:2700,brand:'Smirnoff',img:'img/smirnoff.jpg',stock:18,age:true},
@@ -947,12 +947,17 @@ function renderGrid(){
   if(book){ spon=list.find(p=>p.id===book.sku); list.splice(list.indexOf(spon),1); }
   /* in "All", divisions take turns (pharmacy, retail, deli, wholesale, liquor, repeat);
      the sponsored SKU sits second so the first slot stays editorial */
+  /* Recommended: products with weak or missing photos (`weak:1`, no `img`) sink to the end */
+  const look=p=>!p.img?2:p.weak?1:0;
   if(state.sort!=='rec'){ const eff=p=>p.tiers?p.tiers[0].p:p.price; list.sort((a,b)=>state.sort==='lo'?eff(a)-eff(b):eff(b)-eff(a)); }
   else if(state.div==='All'){
-    const lanes=GRID_ORDER.map(d=>list.filter(p=>p.div===d));
-    list.length=0;
-    for(let i=0;lanes.some(l=>i<l.length);i++) lanes.forEach(l=>{ if(l[i]) list.push(l[i]); });
+    const all=list.slice(); list.length=0;
+    [0,1,2].forEach(r=>{
+      const lanes=GRID_ORDER.map(d=>all.filter(p=>p.div===d&&look(p)===r));
+      for(let i=0;lanes.some(l=>i<l.length);i++) lanes.forEach(l=>{ if(l[i]) list.push(l[i]); });
+    });
   }
+  else list.sort((a,b)=>look(a)-look(b));
   const ordered = spon?list.slice(0,1).concat(spon,list.slice(1)):list;
   $('#resCount').textContent=`${ordered.length} product${ordered.length!==1?'s':''}`;
   $('#catTitle').textContent=state.q?`Results for “${state.q}”`:state.cat!=='All'?state.cat:state.div==='All'?'All products':state.div;
