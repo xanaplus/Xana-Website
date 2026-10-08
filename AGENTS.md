@@ -13,6 +13,7 @@ The owner wants a simple shop that does not look AI-made: no new sections, decor
 - `PRODUCTS`: the catalogue. `rx:true` marks prescription-only items, `age:true` liquor; `fit:'cover'` and `pos` control how a phone-snapshot photo is cropped.
 - `DIVS`, `CATS`: divisions and their categories.
 - `PROMOS`: every ad booking (see ADR-0002). `adAllowed()` enforces the ad rules.
+- Never name a class or id after ads (`ad-*`, `adCarousel`, `banner-ad`…): ad blockers hide them, which is how the offers carousel once vanished for shoppers. The carousel uses `offers` / `offer-*`; check new names against EasyList's `##.name` rules.
 - Deli prices are placeholders until the owner sends the real list.
 
 ## Preview
