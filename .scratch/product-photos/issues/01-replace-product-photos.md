@@ -49,3 +49,7 @@ Deli photos (d1 to d4) are counter scenes on purpose and can stay.
 ## Comments
 
 **2026-10-08:** Swapped the 17 Open Food Facts photos (img/*.jpg from openfoodfacts.org) for the full-size originals of the same images, resized to 900 px on the long side. Same source and licence, so img/credits.json still applies. These phone snapshots now fill their card (`fit:'cover'` in PRODUCTS, with `pos` setting the crop point) instead of floating on white. Still to replace: **s17 Fahari Ya Kenya Tea**, whose only full-size front photo is actually the back of the pack.
+
+**2026-10-08 (later):** Set `fit:'cover'` on 36 more products whose photos have their own background (the 512 × 279 pharmacy shots, deli and produce scenes, Strepsils, ORS, Durex, Amoxicillin, Duka pack). They were showing as small boxes with white bars, and now fill the card like the rest. Still shown whole on white: the bottle shots (wine, Tusker, gin, Kenya Cane, Smirnoff), Vicks, sunscreen, hand sanitiser and Harpic (only 144 px). The Panadol caption in the top-left corner still shows a little; it needs a replacement photo.
+
+**2026-10-08 (placeholders):** AI placeholder photos (Gemini) now on s6 White Sugar, d5 Rotisserie Chicken, s13 Bio Whole Milk and p13 Sunscreen, in `img/placeholder/`. Swap for supplier pack shots when they arrive. Held back, kept locally but not committed: Metformin (box misspells "Hydrochloride"), Fahari and Durex (look like real brand photos of unknown source), penne (product is listed as spaghetti).
