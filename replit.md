@@ -1,0 +1,49 @@
+# Xana Life: build brief for Replit
+
+Read this first, then `AGENTS.md`, `docs/adr/` and `design/README.md`.
+
+## What this is
+
+Xana Life is an online shop in Nairobi with five divisions: Pharmacy, Retail, Deli, Liquor and Wholesale, plus clinic bookings. The design is **finished and approved**. The 19 screens are in `design/screens/`. The live front end is a single static file, `index.html`, with `assets/` and `img/`. It is deployed at https://xana-web.vercel.app/.
+
+Today `index.html` is a working demo. The basket, checkout, orders, prescription upload and clinic booking all run only in the browser. Nothing is saved or sent anywhere. The goal is to make these real for a launch.
+
+## Rules
+
+- **Do not change how the site looks.** No new sections, decoration, animation or restyling. The owner wants a simple shop that does not look AI-made. The layout decision is in `docs/adr/0001-products-first-calm-catalogue.md` and the ad rules are in `docs/adr/0002-ad-slots-and-ad-rules.md`. If something contradicts them, flag it instead of changing it.
+- Pharmacy must stay conspicuous without overshadowing Retail. Keep all five divisions.
+- Keep the front end as plain HTML, CSS and JavaScript with no build step. Add a backend next to it. Change `index.html` only to call the backend in place of the demo code.
+- Never name a class or id after ads (`ad-*`, `banner-ad` and similar). Ad blockers hide them.
+- Prices are in KSh. Show "KSh", never "KES".
+
+## Where the demo code is in `index.html`
+
+| What | Where |
+| --- | --- |
+| Catalogue | the `PRODUCTS` array (`rx:true` marks prescription-only, `age:true` marks liquor) |
+| Divisions and categories | `DIVS`, `CATS` |
+| Ad bookings and rules | `PROMOS`, and `adAllowed()` |
+| Basket and orders | the `state` object, `checkout()` |
+| Prescription upload | the click handler on `#rxSubmit` |
+| Clinic booking | the click handler on `#clSubmit` |
+| Delivery areas | `renderLoc()` |
+| Age check | `state.age` (kept in memory only) |
+
+## What to build, in this order
+
+1. **Catalogue from a database.** Move `PRODUCTS` into a database with stock, prices and photos, and serve it to the page. Add a simple admin page for the owner to edit prices and stock. Deli prices are placeholders until the owner sends the real list.
+2. **Orders and M-PESA.** Replace `checkout()` with a real order: save it, start an M-PESA payment (Safaricom Daraja STK push), and mark the order paid when the payment callback arrives. Delivery is free over KSh 2,500 and KSh 250 under it. The Orders screen reads from this.
+3. **Prescriptions.** Replace the `#rxSubmit` handler: store the uploaded file securely, notify the pharmacist, and never sell a `rx:true` product without an approved prescription. Prescription-only products are never advertised.
+4. **Clinic bookings.** Replace the `#clSubmit` handler: save the booking and send an SMS confirmation. The visit costs KSh 800, payable at the clinic.
+5. **Age check.** Liquor is not for sale to under-18s and ID is checked on delivery. Keep the 18+ prompt, and record the confirmation with the order.
+6. **Ads.** Keep every booking in `PROMOS` and enforce the rules in `docs/adr/0002-ad-slots-and-ad-rules.md` on the server too.
+
+## Things only the owner can provide
+
+Do not invent these. Ask, and leave a clear placeholder until they arrive.
+
+- Safaricom Daraja credentials and the paybill or till number.
+- The real Deli price list.
+- The pharmacist's WhatsApp number (`PROMOS.pharmacist.whatsapp` is empty) and the business WhatsApp and SMS numbers for `PROMOS.capture`.
+- Product photos from suppliers. Photo sources and credits are in `img/credits.json`; open photo work is in `.scratch/product-photos/issues/`.
+- Privacy policy, terms, and Data Protection Act registration for storing prescriptions and customer details.
