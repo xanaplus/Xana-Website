@@ -317,15 +317,15 @@ header.app{position:sticky;top:0;z-index:40;background:#fff;border-bottom:1px so
 .offer-nav button:hover{opacity:1;background:rgba(255,255,255,.12)}
 .offer-progress{display:none}
 @media(max-width:700px){
-  .offer-slide{grid-template-columns:84px minmax(0,1fr);column-gap:14px;row-gap:14px;padding:16px 16px 18px;align-items:start}
+  .offer-slide{grid-template-columns:84px minmax(0,1fr);column-gap:14px;row-gap:14px;padding:16px 16px 68px;align-items:start}
   .offer-art{border-radius:10px}
   .offer-art .ic{font-size:34px}
   .offer-h{font-size:19px}
   .offer-price b{font-size:24px}
   .offer-sub{font-size:13px}
   .offer-actions{grid-column:1/-1;padding:0}
-  .offer-ui{right:16px;bottom:18px}
-  .offer-dots{display:none}
+  .offer-ui{left:16px;right:16px;bottom:18px;justify-content:space-between}
+  .offer-dots{display:flex}
 }
 @media(prefers-reduced-motion:reduce){.offer-view{transition:none}}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
@@ -1214,14 +1214,14 @@ const PROMOS = {
      Every slide copies its price and photo from the booked SKU, so copy cannot drift.
      Omit sku for a service ad and set action to 'clinic' or 'rx'. */
   ads:[
-    {id:'milk-today',label:'Today only',brand:'Brookside',tone:'green',sku:'s14',
-     text:'{name} at {price}',sub:'Order before 9pm and a rider is with you in about 45 minutes.',cta:'Add to basket',until:'Ends 11pm'},
-    {id:'royco-restock',label:'Back in stock',brand:'Royco',tone:'ink',sku:'s8',
-     text:'{name} on the shelf at {price}',sub:'The 200g pack, in stock today and ready to ship.',cta:'Add to basket'},
-    {id:'oil-carton',label:'Wholesale',brand:'Xana Trade',tone:'ink',sku:'w2',
-     text:'{name} at {price}',sub:'Six 3L jerrycans per carton. Bulk tiers start at five cartons.',cta:'Add carton'},
     {id:'clinic-visit',label:'Clinics',brand:'Xana Clinics',tone:'ink',action:'clinic',
-     text:'GP visits, lab tests and jabs',sub:'Walk in at Ruaka, Kilimani or Kitengela Road. Open 8am to 8pm.',cta:'Book a visit · KSh 800'}
+     text:'GP visits, lab tests and jabs',sub:'Walk in at Ruaka, Kilimani or Kitengela Road. Open 8am to 8pm.',cta:'Book a visit · KSh 800'},
+    {id:'browse-pharmacy',label:'Pharmacy',brand:'Xana Pharmacy',tone:'green',action:'shop',division:'Pharmacy',icon:'i-package',
+     text:'Explore your pharmacy essentials',sub:'Browse the pharmacy catalogue. Prescription requirements remain shown on each product.',cta:'Browse pharmacy'},
+    {id:'browse-retail',label:'Retail',brand:'Xana Retail',tone:'gold',action:'shop',division:'Retail',icon:'i-package',
+     text:'Everyday essentials in one place',sub:'Explore groceries and household products with current catalogue prices and stock.',cta:'Browse retail'},
+    {id:'browse-wholesale',label:'Wholesale',brand:'Xana Trade',tone:'ink',action:'shop',division:'Wholesale',icon:'i-package',
+     text:'Browse bales, cartons and bulk packs',sub:'See available packs and current unit prices in the wholesale catalogue.',cta:'Browse wholesale'}
   ],
   /* slot 3: sponsored shelf position, keyed to a real SKU */
   sponsored:[{id:'royco-instock',sku:'s8'}],
@@ -1266,13 +1266,13 @@ function promoAdd(sku){
 }
 /* slot 1: the ad carousel. Auto-advances horizontally, pauses on hover, focus, tab
    switch and when scrolled out of view, and never moves under prefers-reduced-motion. */
-let adIndex=0, adTimer=null, adHover=false, adInView=true;
+let adIndex=0, adTimer=null, adHover=false, adFocus=false, adUserPaused=false, adInView=true;
 const adAt=i=>PROMOS.ads[(i+PROMOS.ads.length)%PROMOS.ads.length];
 const adDelay=a=>a&&a.duration?a.duration:3000;
 const adOff=()=>{try{return matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){return false;}};
 /* slides advance every 3 seconds; they pause on hover, keyboard focus, a hidden tab, when scrolled out of view, and never move for reduce-motion */
 const AD_AUTOPLAY=true;
-function adPaused(){ return !AD_AUTOPLAY || adHover || document.hidden || !adInView || adOff(); }
+function adPaused(){ return !AD_AUTOPLAY || adUserPaused || adHover || adFocus || document.hidden || !adInView || adOff(); }
 function adStop(){ clearTimeout(adTimer); adTimer=null; const p=$('#offerProg'); if(p) p.classList.remove('run'); }
 function adTick(){
   clearTimeout(adTimer); adTimer=null;
@@ -1293,11 +1293,16 @@ function adGoTo(i){
   }
   const dots=document.querySelectorAll('#offerDots button');
   dots.forEach((b,k)=>{b.classList.toggle('on',k===adIndex);b.setAttribute('aria-current',k===adIndex?'true':'false');});
+  document.querySelectorAll('#offerView .offer-slide').forEach((slide,k)=>{
+    slide.inert=k!==adIndex;
+    slide.setAttribute('aria-hidden',k===adIndex?'false':'true');
+  });
   const car=$('#offerCarousel');
   if(car) car.setAttribute('aria-label','Offers, slide '+(adIndex+1)+' of '+n);
   renderOfferBar();
 }
 function adAct(a){
+  if(a.action==='shop') return goShop(a.division);
   if(a.action==='clinic') return openClinic();
   if(a.action==='rx') return openRx();
   if(a.sku) return promoAdd(a.sku);
@@ -1332,6 +1337,7 @@ function renderAdCarousel(){
   <div class="offer-ui">
     <div class="offer-dots" id="offerDots">${ads.map((a,i)=>`<button type="button" class="${i===0?'on':''}" data-offer-dot="${i}" aria-label="Show offer ${i+1}" aria-current="${i===0?'true':'false'}"></button>`).join('')}</div>
     <div class="offer-nav">
+      <button type="button" id="offerPause" style="width:auto;padding:0 10px" aria-label="Pause automatic slides" aria-pressed="false">Pause</button>
       <button type="button" id="offerPrev" aria-label="Previous offer"><svg class="ic"><use href="#i-caret-left"/></svg></button>
       <button type="button" id="offerNext" aria-label="Next offer"><svg class="ic"><use href="#i-caret-right"/></svg></button>
     </div>
@@ -1344,8 +1350,17 @@ function renderAdCarousel(){
   $('#offerNext').onclick=()=>{adGoTo(adIndex+1);adTick();};
   el.onmouseenter=()=>{adHover=true;adStop();};
   el.onmouseleave=()=>{adHover=false;adTick();};
-  el.onfocusin=()=>{adHover=true;adStop();};
-  el.onfocusout=()=>{adHover=false;adTick();};
+  el.onfocusin=()=>{adFocus=true;adStop();};
+  el.onfocusout=e=>{adFocus=el.contains(e.relatedTarget);adTick();};
+  $('#offerPause').onclick=()=>{
+    adUserPaused=!adUserPaused;
+    const button=$('#offerPause');
+    button.textContent=adUserPaused?'Play':'Pause';
+    button.setAttribute('aria-pressed',String(adUserPaused));
+    button.setAttribute('aria-label',adUserPaused?'Resume automatic slides':'Pause automatic slides');
+    if(!adUserPaused) adFocus=false;
+    adTick();
+  };
   el.onkeydown=e=>{
     if(e.key==='ArrowRight'){e.preventDefault();adGoTo(adIndex+1);adTick();}
     if(e.key==='ArrowLeft'){e.preventDefault();adGoTo(adIndex-1);adTick();}
@@ -1411,6 +1426,8 @@ PROMOS.ads=PROMOS.ads.filter(a=>!a.sku||adAllowed(prod(a.sku)));
 renderAdCarousel();
 /* pause the carousel when the tab is hidden or the banner is off screen */
 document.addEventListener('visibilitychange',adTick);
+const carouselMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)');
+carouselMotion?.addEventListener?.('change',adTick);
 if('IntersectionObserver' in window && $('#offerCarousel')){
   new IntersectionObserver(es=>{ adInView=es[0].isIntersecting; adTick(); },{threshold:.25}).observe($('#offerCarousel'));
 }
