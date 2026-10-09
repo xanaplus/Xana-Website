@@ -56,6 +56,12 @@ test('four genuine browsing/service slides continuously loop every three seconds
   }
 });
 
+test('carousel navigation controls are hidden and inert without reserved mobile space', () => {
+  assert.match(html, /class="offer-ui" hidden inert/);
+  assert.match(html, /\.offers\.ready \.offer-ui\{display:none\}/);
+  assert.doesNotMatch(html, /padding:16px 16px 68px/);
+});
+
 test('hover, focus, explicit pause, hidden tabs and reduced motion pause safely', () => {
   const app = carousel();
   for (const flag of ['adHover', 'adFocus', 'adUserPaused', 'document.hidden', '!adInView', 'reduced']) {

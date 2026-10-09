@@ -307,7 +307,7 @@ header.app{position:sticky;top:0;z-index:40;background:#fff;border-bottom:1px so
 .offer-slide .offer-cta.dark:hover{background:var(--ink-2)}
 /* controls live in the bottom-right corner, clear of the product and the button */
 .offer-ui{position:absolute;right:22px;bottom:18px;display:none;align-items:center;gap:8px;z-index:4}
-.offers.ready .offer-ui{display:flex}
+.offers.ready .offer-ui{display:none}
 .offer-dots{display:flex;align-items:center;gap:5px;padding:0 4px}
 .offer-dots button{width:7px;height:7px;border-radius:999px;border:0;background:currentColor;opacity:.4;cursor:pointer;padding:0;transition:width .25s ease,opacity .25s ease}
 .offer-dots button.on{width:20px;opacity:1}
@@ -318,7 +318,7 @@ header.app{position:sticky;top:0;z-index:40;background:#fff;border-bottom:1px so
 .offer-nav button:hover{opacity:1;background:rgba(255,255,255,.12)}
 .offer-progress{display:none}
 @media(max-width:700px){
-  .offer-slide{grid-template-columns:84px minmax(0,1fr);column-gap:14px;row-gap:14px;padding:16px 16px 68px;align-items:start}
+  .offer-slide{grid-template-columns:84px minmax(0,1fr);column-gap:14px;row-gap:14px;padding:16px;align-items:start}
   .offer-art{border-radius:10px}
   .offer-art .ic{font-size:34px}
   .offer-h{font-size:19px}
@@ -1386,7 +1386,7 @@ function renderAdCarousel(){
       <div class="offer-actions"><button class="btn offer-cta${a.tone==='gold'?' dark':''}" type="button" data-offer-cta="${i}">${a.cta}</button></div>
     </article>`;
   }).join('')}</div>
-  <div class="offer-ui">
+  <div class="offer-ui" hidden inert>
     <div class="offer-dots" id="offerDots">${ads.map((a,i)=>`<button type="button" class="${i===0?'on':''}" data-offer-dot="${i}" aria-label="Show offer ${i+1}" aria-current="${i===0?'true':'false'}"></button>`).join('')}</div>
     <div class="offer-nav">
       <button type="button" id="offerPause" style="width:auto;padding:0 10px" aria-label="Pause automatic slides" aria-pressed="false">Pause</button>
