@@ -29,3 +29,29 @@ test('business details shown are only the owner-confirmed ones', () => {
   assert.match(html, /Syokimau/);
   assert.match(html, /close at 9pm/);
 });
+
+test('branch choice is remembered but does not claim branch stock', () => {
+  const vm = require('node:vm');
+  const start = html.indexOf("const BRANCHES=");
+  const code = html.slice(start, html.indexOf('document.querySelectorAll(\'#bottomNav', start));
+  const run = (storedValue) => {
+    const store = new Map(storedValue == null ? [] : [['xana.branch', storedValue]]);
+    const els = {};
+    const el = () => ({ textContent: '', setAttribute(k, v) { this[k] = v; }, querySelectorAll: () => [] });
+    const ctx = {
+      state: { branch: null },
+      $: (q) => (els[q] ||= el()),
+      window: { localStorage: { getItem: (k) => store.has(k) ? store.get(k) : null, setItem: (k, v) => store.set(k, v), removeItem: (k) => store.delete(k) } },
+      openModal() {}, closeAll() {}, toast() {},
+    };
+    vm.runInNewContext(code, ctx);
+    return { ctx, els, store };
+  };
+  const ok = run('Ruiru');
+  assert.equal(ok.ctx.state.branch, 'Ruiru');
+  assert.equal(ok.els['#locName'].textContent, 'Ruiru');
+  const bad = run('Nairobi CBD');
+  assert.equal(bad.ctx.state.branch, null);
+  assert.equal(bad.store.has('xana.branch'), false);
+  assert.match(html, /Choosing one does not confirm stock or prices at that branch/);
+});

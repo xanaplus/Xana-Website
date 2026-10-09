@@ -1442,13 +1442,25 @@ $('#rbUpload').onclick=openRx;
 $('#rbShop').onclick=()=>goShop('Pharmacy');
 const BRANCHES=[{id:'Syokimau',label:'Syokimau · Bellway Park'},{id:'Ruiru',label:'Ruiru'}];
 $('#locChange').onclick=$('#locName').onclick=()=>{ renderLoc(); openModal('#locModal'); };
+// The branch is a remembered preference only. The shared catalogue publishes one
+// total stock figure, not stock per BC location, so it does not filter products.
+const BRANCH_KEY='xana.branch';
+function showBranch(){
+  $('#locName').textContent=state.branch;
+  $('#locName').setAttribute('aria-label','Branch: '+state.branch+'. Change branch');
+  $('#locChange').textContent='Change branch';
+}
+try{
+  const saved=window.localStorage.getItem(BRANCH_KEY);
+  if(BRANCHES.some(br=>br.id===saved)){ state.branch=saved; showBranch(); }
+  else if(saved!==null) window.localStorage.removeItem(BRANCH_KEY);
+}catch{ /* Storage unavailable: the choice lasts for this visit only. */ }
 function renderLoc(){
   $('#locList').innerHTML=BRANCHES.map(br=>`<button type="button" class="btn ${br.id===state.branch?'g':'w'}" data-b="${br.id}">${br.label}</button>`).join('');
   $('#locList').querySelectorAll('button').forEach(b=>b.onclick=()=>{
     state.branch=b.dataset.b;
-    $('#locName').textContent=state.branch;
-    $('#locName').setAttribute('aria-label','Branch: '+state.branch+'. Change branch');
-    $('#locChange').textContent='Change branch';
+    showBranch();
+    try{ window.localStorage.setItem(BRANCH_KEY,state.branch); }catch{ /* Kept for this visit only. */ }
     closeAll(); toast('Branch: '+state.branch);
   });
 }
