@@ -438,6 +438,7 @@ nav.bottom{
   border:0;border-radius:var(--rc);padding:15px;font-family:var(--font-d);font-weight:600;font-size:15px;cursor:pointer;margin-top:12px;
 }
 .checkout:hover{background:var(--green-700)}
+.checkout:disabled{cursor:not-allowed;opacity:.65}
 .checkout .ic{font-size:18px}
 .foot-note{font-size:11.5px;color:var(--muted);text-align:center;margin-top:10px}
 .ordersuccess{
@@ -1093,9 +1094,9 @@ function renderBasket(){
    <div class="totrow" style="margin-top:10px"><span>Subtotal</span><b>${ksh(sub)}</b></div>
    <div class="totrow"><span>Delivery (${state.area})</span><b>${del===0?'FREE':ksh(del)}</b></div>
    <div class="totrow grand"><span>Total</span><span>${ksh(tot)}</span></div>
-   <button class="checkout" id="coBtn"><svg class="ic"><use href="#i-mpesa"/></svg> Checkout · M-PESA</button>
+   <button class="checkout" id="coBtn" type="button" disabled aria-describedby="checkoutNotice">Checkout unavailable · Demo</button>
+   <p class="foot-note" id="checkoutNotice">Browsing demo only. No order will be placed, no M-PESA prompt will be sent, and no payment will be taken.</p>
    <p class="foot-note">Liquor is not sold to under-18s. ID is checked on delivery.</p>`;
-  $('#coBtn').onclick=checkout;
   const xb=foot.querySelector('.xadd');
   if(xb) xb.onclick=()=>add(xb.dataset.x,1);
 }
@@ -1119,17 +1120,13 @@ function topUpSuggestion(){
   return {p:same[0]||pool.slice().sort(byPrice)[0],reason:'More '+top};
 }
 function checkout(){
-  const n=cartCount(),t=cartTotal()+(cartTotal()>=2500?0:250);
-  const id='XN-'+Math.floor(100000+Math.random()*900000);
-  state.orders.unshift({id,items:n,total:t,when:new Date().toLocaleString('en-KE',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}),area:state.area});
-  state.cart={}; renderAll(); renderOrders();
-  $('#ordersBody').insertAdjacentHTML('afterbegin',`<div class="ordersuccess"><svg class="ic"><use href="#i-check"/></svg><span><b>Order ${id} placed</b><br>Approve the M-PESA prompt on your phone. The rider departs for ${state.area} once payment lands.</span></div>`);
-  openDrawer('#ordersDrawer');
+  // Fail closed even if an old caller invokes checkout directly.
+  toast('Demo only: checkout is unavailable. No order or payment has been made.');
+  return false;
 }
 function renderOrders(){
   const b=$('#ordersBody');
-  const prev=b.querySelector('.ordersuccess');
-  b.innerHTML=(prev?prev.outerHTML:'')+(state.orders.length?state.orders.map(o=>`<div class="brow"><div class="bi" style="background:#EAF3EA;color:var(--green)"><svg class="ic"><use href="#i-package"/></svg></div><div class="bn"><b>${o.id}</b> · ${o.items} item${o.items===1?'':'s'}<small>${o.when} · ${o.area} · <b>${ksh(o.total)}</b> · <span style="color:var(--green)">Preparing</span></small></div></div>`).join(''):`<div class="empty"><svg class="ic ic-lg"><use href="#i-package"/></svg><b>No orders yet</b><span>Your M-PESA checkouts will appear here.</span></div>`);
+  b.innerHTML=`<div class="empty"><svg class="ic ic-lg"><use href="#i-package"/></svg><b>Orders unavailable in this demo</b><span>Checkout is disabled. This website does not place orders or take payments, and does not display your Xana Plus App orders.</span></div>`;
 }
 /* MODALS / DRAWERS */
 function openDrawer(s){ closeAll(true); $(s).classList.add('show'); $('#scrim').classList.add('show'); if(s==='#basketDrawer')renderBasket(); if(s==='#ordersDrawer')renderOrders(); if(s==='#catsDrawer')renderCatsDrawer(); }
