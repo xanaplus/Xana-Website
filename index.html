@@ -636,7 +636,7 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
   <section class="bulk" aria-labelledby="bulkH">
     <div>
       <h3 id="bulkH">Buying for a shop, school or event?</h3>
-      <p>Wholesale bales and cartons get cheaper the more you buy. Collect from the wholesale lane at Industrial Area.</p>
+      <p id="bulkPricingNote">Bales and cartons at current unit prices. Quantity discounts will appear when verified prices are available from the shared catalogue. Collect from the wholesale lane at Industrial Area.</p>
     </div>
     <button class="btn g" id="bulkBtn" type="button">See wholesale prices <svg class="ic"><use href="#i-arrow-right"/></svg></button>
   </section>
@@ -763,6 +763,7 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 
+<script src="assets/catalogue-rules.js"></script>
 <script>
 
 /* the five divisions, in the app's order. Pharmacy and Retail lead as panels;
@@ -773,7 +774,7 @@ const DIVS = [
   {id:'Retail', icon:'i-storefront', lead:true, quick:['Staples','Fresh produce','Dairy & eggs','Household']},
   {id:'Deli', icon:'i-deli', tile:'img/app/deli-cold-cuts.jpg', blurb:'Cold cuts, cheese and hot food'},
   {id:'Liquor', icon:'i-wine', tile:'img/app/liquor.jpg', blurb:'Wine, spirits and beer', tag:'18+'},
-  {id:'Wholesale', icon:'i-package', tile:'img/app/wholesale-pack-3.jpg', blurb:'Bales and cartons, tiered prices'},
+  {id:'Wholesale', icon:'i-package', tile:'img/app/wholesale-pack-3.jpg', blurb:'Bales, cartons and eligible quantity deals'},
 ];
 const CATS = {
   'Pharmacy':['All','Pain & fever','Cold & flu','Vitamins','Mother & baby','Skin care','Diabetes care','Devices','First aid','Personal care','Antibiotics'],
@@ -880,9 +881,11 @@ const state = {div:'All',cat:'All',q:'',sort:'rec',max:Infinity,inStock:false,br
 const $ = s=>document.querySelector(s);
 const ksh = n=>'KSh '+Number(n).toLocaleString('en-KE');
 const prod = id=>PRODUCTS.find(p=>p.id===id);
-function unitPrice(p,qty){ if(!p.tiers) return p.price; if(qty>=tierMin(p,2)) return p.tiers[2].p; if(qty>=tierMin(p,1)) return p.tiers[1].p; return p.tiers[0].p; }
-function tierMin(p,i){ const l=p.tiers[i].l; const m=l.match(/(\d+)\s*[-+]/)||l.match(/(\d+)/); if(/20\+/.test(l))return 20; if(/10\+/.test(l))return 10; if(/5/.test(l))return 5; return m?+m[1]:1; }
-function activeTier(p,qty){ if(!p.tiers) return -1; if(qty>=tierMin(p,2))return 2; if(qty>=tierMin(p,1))return 1; return 0; }
+const inDivision=CatalogueRules.inDivision;
+const productCategory=CatalogueRules.category;
+const inCategory=CatalogueRules.inCategory;
+const unitPrice=CatalogueRules.unitPrice;
+const activeTier=CatalogueRules.activeTier;
 function cartCount(){ return Object.values(state.cart).reduce((a,b)=>a+b,0); }
 function cartTotal(){ return Object.entries(state.cart).reduce((a,[id,q])=>a+unitPrice(prod(id),q)*q,0); }
 
@@ -890,7 +893,7 @@ function cartTotal(){ return Object.entries(state.cart).reduce((a,[id,q])=>a+uni
 function renderDivs(){
   const el=$('#divs'); el.innerHTML='';
   DIVS.forEach(d=>{
-    const n = d.id==='All'?PRODUCTS.length:PRODUCTS.filter(p=>p.div===d.id).length;
+    const n = PRODUCTS.filter(p=>inDivision(p,d.id)).length;
     const b=document.createElement('button');
     b.className='tab'+(state.div===d.id?' active':'');
     b.setAttribute('aria-pressed',state.div===d.id);
@@ -899,9 +902,9 @@ function renderDivs(){
     el.appendChild(b);
   });
 }
-const divCount=id=>PRODUCTS.filter(p=>p.div===id).length;
+const divCount=id=>PRODUCTS.filter(p=>inDivision(p,id)).length;
 /* category names repeat across divisions, so a count is always for the (division, category) pair */
-const catCount=(div,cat)=>PRODUCTS.filter(p=>(div==='All'||p.div===div)&&(cat==='All'||p.cat===cat)).length;
+const catCount=(div,cat)=>PRODUCTS.filter(p=>inDivision(p,div)&&inCategory(p,div,cat)).length;
 /* jump to the product grid with a division (and optionally a category) applied */
 function goShop(div,cat){
   if(div==='Liquor'&&!state.age){ window._pendingDiv=div; window._pendingScroll=true; openModal('#ageModal'); return; }
@@ -933,11 +936,11 @@ function renderChips(){
 }
 function filtered(){
   return PRODUCTS.filter(p=>{
-    if(state.div!=='All'&&p.div!==state.div) return false;
+    if(!inDivision(p,state.div)) return false;
     if(state.cat==='On offer'){ if(!(p.old>p.price)) return false; }
-    else if(state.cat!=='All'&&p.cat!==state.cat) return false;
-    if(state.q){ const q=state.q.toLowerCase(); if(!(p.name+' '+p.pack+' '+p.brand+' '+p.cat).toLowerCase().includes(q)) return false; }
-    const eff = p.tiers?p.tiers[2].p:p.price;
+    else if(!inCategory(p,state.div,state.cat)) return false;
+    if(state.q){ const q=state.q.toLowerCase(); if(!(p.name+' '+p.pack+' '+p.brand+' '+Object.values(p.categories||{main:p.cat}).join(' ')).toLowerCase().includes(q)) return false; }
+    const eff = unitPrice(p,Math.max(state.cart[p.id]||0,1));
     if(eff>state.max) return false;
     if(state.inStock&&p.stock<=0) return false;
     if(state.brands.size&&!state.brands.has(p.brand)) return false;
@@ -970,7 +973,7 @@ function renderGrid(){
      the sponsored SKU sits second so the first slot stays editorial */
   /* Keep each division visible while putting stocked products with real photos first. */
   const look=p=>p.stock<=0?2:!p.img?1:0;
-  if(state.sort!=='rec'){ const eff=p=>p.tiers?p.tiers[0].p:p.price; list.sort((a,b)=>state.sort==='lo'?eff(a)-eff(b):eff(b)-eff(a)); }
+  if(state.sort!=='rec'){ const eff=p=>unitPrice(p,Math.max(state.cart[p.id]||0,1)); list.sort((a,b)=>state.sort==='lo'?eff(a)-eff(b):eff(b)-eff(a)); }
   else if(state.div==='All'){
     const all=list.slice(); list.length=0;
     const lanes=GRID_ORDER.map(d=>all.filter(p=>p.div===d).sort((a,b)=>look(a)-look(b)));
@@ -992,7 +995,7 @@ function renderGrid(){
     let tierHtml='';
     if(p.tiers){
       const on=activeTier(p,Math.max(q,1));
-      tierHtml=`<div class="tiers"><table><tr><th>Qty</th><th>Per unit</th></tr>${p.tiers.map((t,i)=>`<tr class="${i===on?'on':''}"><td>${t.l}</td><td>${ksh(t.p)}</td></tr>`).join('')}</table></div>`;
+      tierHtml=`<div class="tiers"><table><tr><th>Qty</th><th>Per unit</th></tr>${p.tiers.map((t,i)=>`<tr class="${i===on?'on':''}"><td>${escapeHtml(t.l)}</td><td>${ksh(t.p)}</td></tr>`).join('')}</table></div>`;
     }
     const priceNow = p.tiers?unitPrice(p,Math.max(q,1)):p.price;
     card.innerHTML=`
@@ -1004,7 +1007,7 @@ function renderGrid(){
         ${p.stock<=0?`<span class="oos">Out of stock</span>`:''}
       </div>
       <div class="card-body">
-        <div class="brandrow"><span>${escapeHtml(p.brand)}</span><span>${escapeHtml(p.div)}</span></div>
+        <div class="brandrow"><span>${escapeHtml(productCategory(p,state.div))}</span><span>${escapeHtml(p.tiers&&activeTier(p,q)>0?p.div+' · Wholesale price':p.div)}</span></div>
         <div class="pname">${escapeHtml(p.name)}</div>
         <div class="pack">${escapeHtml(p.pack)}</div>
         <div class="pricerow"><span class="price"><small>KSh</small> ${priceNow.toLocaleString('en-KE')}</span>${p.old&&!p.tiers?`<span class="old">${ksh(p.old)}</span>`:''}</div>
@@ -1017,7 +1020,7 @@ function renderGrid(){
     else if(!q){ const b=document.createElement('button'); b.className='addbtn'; b.innerHTML='<svg class="ic"><use href="#i-plus"/></svg> Add to basket'; b.onclick=()=>add(id2(p),1); act.appendChild(b); }
     else{
       const s=document.createElement('div'); s.className='stepper';
-      s.innerHTML=`<button aria-label="decrease">−</button><strong>${q} ${p.tiers?'bale'+(q>1?'s':''):''}</strong><button aria-label="increase">+</button>`;
+      s.innerHTML=`<button aria-label="decrease">−</button><strong>${q}</strong><button aria-label="increase">+</button>`;
       const [dec,inc]=s.querySelectorAll('button');
       dec.onclick=()=>add(p.id,-1); inc.onclick=()=>add(p.id,1);
       act.appendChild(s);
@@ -1030,7 +1033,7 @@ function renderGrid(){
 function renderCatsDrawer(){
   const list=CATS[state.div]||CATS.All;
   $('#catsBody').innerHTML=`<div style="display:flex;gap:8px;flex-wrap:wrap">`+DIVS.map(d=>`<button class="chip ${state.div===d.id?'active':''}" data-d="${d.id}"><svg class="ic"><use href="#${d.icon}"/></svg> ${d.id}</button>`).join('')+`</div><hr style="border:none;border-top:1px solid var(--line);margin:12px 0">`
-   +list.map(c=>`<button class="chip ${state.cat===c?'active':''}" data-c="${c}" style="margin:0 6px 8px 0">${c}</button>`).join('');
+   +list.map(c=>`<button class="chip ${state.cat===c?'active':''}" data-c="${escapeHtml(c)}" style="margin:0 6px 8px 0">${escapeHtml(c)}</button>`).join('');
   $('#catsBody').querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{closeAll();selectDiv(b.dataset.d);});
   $('#catsBody').querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{state.cat=b.dataset.c;resetVisible();closeAll();renderAll();});
 }
@@ -1067,7 +1070,7 @@ function renderBasket(){
   ids.forEach(id=>{
     const p=prod(id),q=state.cart[id],u=unitPrice(p,q);
     const r=document.createElement('div'); r.className='brow';
-    r.innerHTML=`<div class="bi"${p.tint?` style="background:${p.tint}"`:''}>${p.img?`<img src="${escapeHtml(p.img)}" alt="" loading="lazy" onerror="this.remove()">`:`<span class="mono" aria-hidden="true"><svg class="ic"><use href="#${p.icon||'i-package'}"/></svg></span>`}</div><div class="bn">${escapeHtml(p.name)}<small>${escapeHtml(p.pack)} · ${ksh(u)} each</small><small><b>${ksh(u*q)}</b></small></div>`;
+    r.innerHTML=`<div class="bi"${p.tint?` style="background:${p.tint}"`:''}>${p.img?`<img src="${escapeHtml(p.img)}" alt="" loading="lazy" onerror="this.remove()">`:`<span class="mono" aria-hidden="true"><svg class="ic"><use href="#${p.icon||'i-package'}"/></svg></span>`}</div><div class="bn">${escapeHtml(p.name)}<small>${escapeHtml(p.pack)} · ${ksh(u)} each${activeTier(p,q)>0?' · Wholesale price':''}</small><small><b>${ksh(u*q)}</b></small></div>`;
     const m=document.createElement('div'); m.className='mini';
     m.innerHTML=`<button>−</button><strong>${q}</strong><button>+</button>`;
     m.querySelectorAll('button')[0].onclick=()=>add(id,-1);
@@ -1145,8 +1148,12 @@ async function loadCatalogue(){
     const result=await response.json();
     if(!Array.isArray(result.products)) throw new Error('The live catalogue response was invalid');
     PRODUCTS=result.products;
+    const quantityDeals=PRODUCTS.some(p=>p.tiers?.length);
+    $('#bulkPricingNote').textContent=quantityDeals
+      ? 'Eligible products switch to verified wholesale prices at the quantities shown on their cards. Collect from the wholesale lane at Industrial Area.'
+      : 'Bales and cartons at current unit prices. Quantity discounts are not yet available from the shared catalogue. Collect from the wholesale lane at Industrial Area.';
     for(const div of DIVS.slice(1)){
-      const available=new Set(PRODUCTS.filter(p=>p.div===div.id).map(p=>p.cat));
+      const available=new Set(PRODUCTS.filter(p=>inDivision(p,div.id)).map(p=>productCategory(p,div.id)));
       const original=CATS[div.id].slice(1).filter(cat=>available.has(cat));
       CATS[div.id]=['All',...original,...[...available].filter(cat=>!original.includes(cat))];
     }

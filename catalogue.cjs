@@ -3,16 +3,15 @@
 const PAGE_SIZE = 1000;
 const CACHE_MS = 30_000;
 const COLUMNS = 'item_no,name,price,stock,category,item_category_code,requires_rx,age_restricted,photo_url';
+// Optional public contract, not private products-table fields. The current app
+// view lacks these columns; only a specific missing-column response permits
+// the documented compatibility path. Auth/network/other failures remain errors.
+const CLASSIFICATION_COLUMNS = 'website_division,website_category,wholesale_tiers';
+const { classify, quantityTiers } = require('./classification.cjs');
 let cached;
 let expiresAt = 0;
 let pending;
 
-// Match the mobile app's pharmacy shelves, including GENERAL and skin care.
-const pharmacyGroups = new Set(['GENERAL', 'CHRONIC', 'CONTROLLED', 'OVER THE COUNTER', 'SUPPLEMENT', 'COSMETICS & BEAUTY P']);
-const pharmacyCodes = new Set([
-  'PHARMACY', 'PHARMACY & RETAIL', 'POM', 'CHRONIC', 'OTC',
-  'CONTROLLED', 'OVER THE COUNTER', 'SUPPLEMENT',
-]);
 const categoryNames = {
   'FOODSTUFFS': 'Staples',
   'GROCERIES & CEREALS': 'Staples',
@@ -38,6 +37,8 @@ const categoryNames = {
   'SHOE CARE': 'Household',
   'STATIONARY': 'Books & stationery',
   'RETBEAU': 'Beauty & personal care',
+  'CLOTHING': 'General merchandise',
+  'LUGGAGE': 'General merchandise',
   'COSMETICS & BEAUTY P': 'Skin care',
   'ORAL CARE': 'Personal care',
   'GENERAL': 'Medicines',
@@ -63,13 +64,8 @@ function product(row) {
   const name = (row.name || row.item_no).trim();
   const price = Number(row.price);
   if (!Number.isFinite(price) || price <= 0) return null;
-  const group = row.category || '';
-  const code = row.item_category_code || '';
-  let div = 'Retail';
-  if (row.age_restricted || group === 'WINES & SPIRITS') div = 'Liquor';
-  else if (code === 'DELI') div = 'Deli';
-  else if (row.requires_rx || pharmacyGroups.has(group) || pharmacyCodes.has(code)) div = 'Pharmacy';
-  else if (/\b(?:bale|carton|case of|sack|25\s?kg|50\s?kg)\b/i.test(name)) div = 'Wholesale';
+  const { div, group, rx, age, declared } = classify(row, name);
+  const tiers = quantityTiers(row.wholesale_tiers, price);
 
   let cat = categoryNames[group] || 'Other';
   if (div === 'Deli') cat = group === 'MEAT PRODUCTS' ? 'Meat & deli' : 'Prepared foods';
@@ -78,6 +74,14 @@ function product(row) {
     cat = /\b(?:beer|lager|cider|ale)\b/i.test(name) ? 'Beer & cider'
       : /\b(?:wine|merlot|cabernet|sauvignon|shiraz)\b/i.test(name) ? 'Wine' : 'Spirits';
   }
+  if (row.website_category != null && row.website_category !== '') {
+    if (typeof row.website_category !== 'string' || !row.website_category.trim()) {
+      throw new Error('Catalogue contains an invalid website category');
+    }
+    cat = row.website_category.trim();
+  }
+  const categories = { [div]: cat };
+  if (tiers && div !== 'Wholesale') categories.Wholesale = `Bulk ${(categoryNames[group] || cat).toLowerCase()}`;
   const pack = name.match(/\b\d+\s?'?s\b|\b\d+(?:[.,]\d+)?\s?(?:ml|ltrs?|lt|l|kg|gms?|g|mg|mcg|pcs|pc|pk|pack|tabs|caps)\b/gi)?.at(-1) || '';
   let img = '';
   try {
@@ -92,12 +96,16 @@ function product(row) {
     stock: Math.max(0, Number(row.stock) || 0),
     div,
     cat,
+    divisions: Object.keys(categories),
+    categories,
+    classificationSource: declared ? 'shared-catalogue' : 'bc-groups-and-names',
     brand: cat,
     pack,
     img,
     fit: img ? 'contain' : undefined,
-    rx: row.requires_rx === true || (div === 'Pharmacy' && row.requires_rx !== false),
-    age: div === 'Liquor',
+    rx: rx || (div === 'Pharmacy' && row.requires_rx !== false),
+    age: age || div === 'Liquor',
+    ...(tiers ? { tiers } : {}),
   };
 }
 
@@ -122,12 +130,29 @@ async function loadCatalogue() {
       },
       signal: AbortSignal.timeout(20_000),
     });
-    if (!response.ok) throw new Error(`Catalogue read failed (HTTP ${response.status})`);
+    if (!response.ok) {
+      const detail = await response.json().catch(() => ({}));
+      const error = new Error(`Catalogue read failed (HTTP ${response.status})`);
+      error.missingClassification = response.status === 400 &&
+        ['42703', 'PGRST204'].includes(detail.code) &&
+        /(?:website_division|website_category|wholesale_tiers)/.test(detail.message || '');
+      throw error;
+    }
     const rows = await response.json();
     if (!Array.isArray(rows)) throw new Error('Catalogue returned an invalid response');
     return { rows, total: Number(response.headers.get('content-range')?.split('/')[1]) };
   }
-  const first = await page(0, true);
+  endpoint.searchParams.set('select', `${COLUMNS},${CLASSIFICATION_COLUMNS}`);
+  let first;
+  let classificationFieldsAvailable = true;
+  try {
+    first = await page(0, true);
+  } catch (error) {
+    if (!error.missingClassification) throw error;
+    classificationFieldsAvailable = false;
+    endpoint.searchParams.set('select', COLUMNS);
+    first = await page(0, true);
+  }
   if (!Number.isSafeInteger(first.total) || first.total < 0) throw new Error('Catalogue count unavailable');
   const offsets = [];
   for (let offset = PAGE_SIZE; offset < first.total; offset += PAGE_SIZE) offsets.push(offset);
@@ -135,7 +160,12 @@ async function loadCatalogue() {
   const rows = [first, ...rest].flatMap(result => result.rows);
   if (rows.length !== first.total) throw new Error('Catalogue changed during loading; retry shortly');
   const products = rows.map(product).filter(Boolean);
-  return { products, updatedAt: new Date().toISOString() };
+  return {
+    products,
+    updatedAt: new Date().toISOString(),
+    classificationFieldsAvailable,
+    quantityPricedProducts: products.filter(p => p.tiers).length,
+  };
 }
 
 function getCatalogue() {
