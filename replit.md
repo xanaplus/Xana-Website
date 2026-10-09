@@ -13,8 +13,12 @@ Today `index.html` is a working demo. The basket, checkout, orders, prescription
 - Click **Run** to start the **Xana Life demo** workflow, or run `node server.cjs`.
 - Open Preview. The server listens on `0.0.0.0:5000` and serves `index.html`, `assets/`, and `img/` only.
 - No dependency installation, build step, secrets, or external services are required for this demo. Node.js 20 is already configured.
-- The approved storefront is unchanged. Checkout, orders, prescription uploads, and clinic bookings remain browser-only simulations; they do not process payments or save/send customer data.
-- This server is for previewing the existing static demo, not the launch backend described below.
+- The approved layout is unchanged. Checkout, orders, prescription uploads, and clinic bookings remain browser-only simulations; they do not process payments or save/send customer data.
+- The product catalogue now reads the Xana Plus App's customer-facing Supabase `catalogue` view through `/api/catalogue`. It uses the same Business Central-synced prices, inventory and photos as the app. The underlying `products` table (including costs and margins) is never exposed. If the read fails, no demo prices or stock are shown.
+- Add `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` to this project's Secrets, using the Xana Plus App's existing `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_KEY` values. Only its **publishable/anon** key is accepted; do not use a service-role key.
+- The production site at Vercel also requires **these two environment variable names** in its Vercel project settings before deploying the updated website. Replit Secrets do not transfer to Vercel. Set them for Production (and Preview if desired), then redeploy; do not sync this change to a live Vercel site before configuring its environment.
+- `/api/catalogue` is a Vercel function in production and is served by `server.cjs` for Replit preview. Both share the same read-only handler. No database migration or separate database is needed. This is not an order or payment backend.
+- The app's catalogue does not include discounted/wholesale tier prices; the website does not fabricate these. Existing product-specific demo ad bookings need matching Business Central item numbers before they can appear with live catalogue items.
 
 ## Rules
 
@@ -28,7 +32,7 @@ Today `index.html` is a working demo. The basket, checkout, orders, prescription
 
 | What | Where |
 | --- | --- |
-| Catalogue | the `PRODUCTS` array (`rx:true` marks prescription-only, `age:true` marks liquor) |
+| Catalogue | `catalogue.cjs` reads the Xana Plus App's Supabase `catalogue` view; `index.html` fetches `/api/catalogue` and renders its products (`rx:true` marks prescription-only, `age:true` marks liquor). The old demo list is inert reference data. |
 | Divisions and categories | `DIVS`, `CATS` |
 | Ad bookings and rules | `PROMOS`, and `adAllowed()` |
 | Basket and orders | the `state` object, `checkout()` |

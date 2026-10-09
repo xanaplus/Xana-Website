@@ -629,6 +629,9 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
     <section class="takeover" id="takeover" hidden aria-label="Category promotion"></section>
     <div class="wine-note" id="wineNote" style="display:none"><svg class="ic"><use href="#i-age"/></svg><span>Liquor. Not for sale to persons under 18. Drink responsibly.</span></div>
     <div class="grid" id="grid"></div>
+    <div id="moreWrap" hidden style="text-align:center;margin:20px 0">
+      <button type="button" class="btn w" id="moreBtn">Show more products</button>
+    </div>
   </main>
 
   <section class="bulk" aria-labelledby="bulkH">
@@ -789,7 +792,7 @@ function pharmacyOpen(){
 }
 CATS.All=['All'].concat(...DIVS.slice(1).map(d=>CATS[d.id].slice(1)));
 /* price = unit price (or tier-1 price for wholesale) */
-const PRODUCTS = [
+const LEGACY_DEMO_PRODUCTS = [
  // PHARMACY · photos in img/ + img/app/
  {id:'p1',div:'Pharmacy',cat:'Pain & fever',name:'Panadol Extra Tablets',pack:'Pack of 100',price:780,old:920,brand:'Panadol',img:'img/app/panadol-extra.jpg',fit:'cover',weak:1,stock:60},
  {id:'p2',div:'Pharmacy',cat:'Pain & fever',name:'Ibuprofen 400mg Tablets',pack:'Pack of 30',price:280,old:null,brand:'Generic',img:'img/app/ibuprofen-400mg.jpg',fit:'cover',stock:40},
@@ -865,7 +868,16 @@ const PRODUCTS = [
  {id:'v4',div:'Liquor',cat:'Spirits',name:"Gilbey's Gin",pack:'1 L bottle',price:2200,old:null,brand:"Gilbey's",img:'img/gilbeys-gin.jpg',stock:20,age:true},
  {id:'v5',div:'Liquor',cat:'Spirits',name:'Smirnoff Vodka',pack:'1 L bottle',price:2450,old:2700,brand:'Smirnoff',img:'img/smirnoff.jpg',stock:18,age:true},
 ];
-const state = {div:'All',cat:'All',q:'',sort:'rec',max:6000,inStock:false,brands:new Set(),cart:{},orders:[],age:false,area:'Nairobi'};
+// The demo list is retained for reference only; prices and stock on screen
+// must always come from the same customer-facing catalogue as the app.
+let PRODUCTS = [];
+let catalogueStatus = 'loading';
+let shown = 48;
+const resetVisible = () => { shown = 48; };
+const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char => ({
+  '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;',
+})[char]);
+const state = {div:'All',cat:'All',q:'',sort:'rec',max:Infinity,inStock:false,brands:new Set(),cart:{},orders:[],age:false,area:'Nairobi'};
 const $ = s=>document.querySelector(s);
 const ksh = n=>'KSh '+Number(n).toLocaleString('en-KE');
 const prod = id=>PRODUCTS.find(p=>p.id===id);
@@ -883,7 +895,7 @@ function renderDivs(){
     const b=document.createElement('button');
     b.className='tab'+(state.div===d.id?' active':'');
     b.setAttribute('aria-pressed',state.div===d.id);
-    b.innerHTML=`<span>${d.id}</span> <small>${n}</small>`;
+    b.innerHTML=`<span>${d.id}</span> <small>${n.toLocaleString('en-KE')}</small>`;
     b.onclick=()=>selectDiv(d.id);
     el.appendChild(b);
   });
@@ -894,7 +906,7 @@ const catCount=(div,cat)=>PRODUCTS.filter(p=>(div==='All'||p.div===div)&&(cat===
 /* jump to the product grid with a division (and optionally a category) applied */
 function goShop(div,cat){
   if(div==='Liquor'&&!state.age){ window._pendingDiv=div; window._pendingScroll=true; openModal('#ageModal'); return; }
-  state.div=div; state.cat=cat||'All'; renderAll();
+  state.div=div; state.cat=cat||'All'; resetVisible(); renderAll();
   $('#main').scrollIntoView({behavior:'smooth',block:'start'});
 }
 /* Pharmacy and Retail row: only the pharmacy's open/overnight line is dynamic */
@@ -906,7 +918,7 @@ function renderRxStatus(){
 }
 function selectDiv(id){
   if(id==='Liquor' && !state.age){ openModal('#ageModal'); window._pendingDiv=id; return; }
-  state.div=id; state.cat='All'; renderAll();
+  state.div=id; state.cat='All'; resetVisible(); renderAll();
   document.querySelectorAll('#bottomNav .navbtn').forEach(b=>b.classList.toggle('active',b.dataset.nav==='shop'));
 }
 function renderChips(){
@@ -916,7 +928,7 @@ function renderChips(){
   list.forEach(c=>{
     const b=document.createElement('button');
     b.className='chip'+(state.cat===c?' active':'');
-    b.textContent=c; b.onclick=()=>{state.cat=c;renderAll();};
+    b.textContent=c; b.onclick=()=>{state.cat=c;resetVisible();renderAll();};
     el.appendChild(b);
   });
 }
@@ -936,6 +948,16 @@ function filtered(){
 function disc(p){ if(!p.old||p.old<=p.price) return null; return Math.round((1-p.price/p.old)*100); }
 function renderGrid(){
   const g=$('#grid'); const list=filtered();
+  $('#moreWrap').hidden=true;
+  if(catalogueStatus!=='ready'){
+    $('#resCount').textContent=catalogueStatus==='loading'?'Loading…':'Unavailable';
+    $('#takeover').hidden=true;
+    g.innerHTML=catalogueStatus==='loading'
+      ? '<div class="empty" style="grid-column:1/-1"><b>Loading current products…</b></div>'
+      : '<div class="empty" style="grid-column:1/-1"><b>Live catalogue unavailable</b><span>Prices and stock could not be checked. Please try again.</span><button class="btn w" id="retryCatalogue" type="button">Retry</button></div>';
+    if(catalogueStatus==='error') $('#retryCatalogue').onclick=loadCatalogue;
+    return;
+  }
   /* slot 3: a sponsored SKU is pinned to the first grid position, and only when it is
      already part of the current results, so the slot can never show an unrelated product */
   let spon=null;
@@ -947,25 +969,23 @@ function renderGrid(){
   if(book){ spon=list.find(p=>p.id===book.sku); list.splice(list.indexOf(spon),1); }
   /* in "All", divisions take turns (pharmacy, retail, deli, wholesale, liquor, repeat);
      the sponsored SKU sits second so the first slot stays editorial */
-  /* Recommended: products with weak or missing photos (`weak:1`, no `img`) sink to the end */
-  const look=p=>!p.img?2:p.weak?1:0;
+  /* Keep each division visible while putting stocked products with real photos first. */
+  const look=p=>p.stock<=0?2:!p.img?1:0;
   if(state.sort!=='rec'){ const eff=p=>p.tiers?p.tiers[0].p:p.price; list.sort((a,b)=>state.sort==='lo'?eff(a)-eff(b):eff(b)-eff(a)); }
   else if(state.div==='All'){
     const all=list.slice(); list.length=0;
-    [0,1,2].forEach(r=>{
-      const lanes=GRID_ORDER.map(d=>all.filter(p=>p.div===d&&look(p)===r));
-      for(let i=0;lanes.some(l=>i<l.length);i++) lanes.forEach(l=>{ if(l[i]) list.push(l[i]); });
-    });
+    const lanes=GRID_ORDER.map(d=>all.filter(p=>p.div===d).sort((a,b)=>look(a)-look(b)));
+    for(let i=0;lanes.some(l=>i<l.length);i++) lanes.forEach(l=>{ if(l[i]) list.push(l[i]); });
   }
   else list.sort((a,b)=>look(a)-look(b));
   const ordered = spon?list.slice(0,1).concat(spon,list.slice(1)):list;
-  $('#resCount').textContent=`${ordered.length} product${ordered.length!==1?'s':''}`;
+  $('#resCount').textContent=`${ordered.length.toLocaleString('en-KE')} product${ordered.length!==1?'s':''}`;
   $('#catTitle').textContent=state.q?`Results for “${state.q}”`:state.cat!=='All'?state.cat:state.div==='All'?'All products':state.div;
   $('#wineNote').style.display = state.div==='Liquor'?'block':'none';
   renderTakeover();
   if(!ordered.length){ g.innerHTML=`<div class="empty" style="grid-column:1/-1"><svg class="ic ic-lg"><use href="#i-search"/></svg><b>No products found</b><span>Try a different search, or clear the filters.</span></div>`; return; }
   g.innerHTML='';
-  ordered.forEach(p=>{
+  ordered.slice(0,shown).forEach(p=>{
     const q=state.cart[p.id]||0;
     const d=disc(p);
     const isSpon = !!(spon&&p.id===spon.id);
@@ -977,7 +997,7 @@ function renderGrid(){
     }
     const priceNow = p.tiers?unitPrice(p,Math.max(q,1)):p.price;
     card.innerHTML=`
-      <div class="img${p.fit==='cover'?' cover':''}"${p.tint?` style="background:${p.tint}"`:''}>${p.img?`<img src="${p.img}" alt="${p.name.replace(/"/g,'')}" loading="lazy"${p.pos?` style="object-position:${p.pos}"`:''} onerror="this.remove()">`:`<span class="mono" aria-hidden="true"><svg class="ic"><use href="#${p.icon||'i-package'}"/></svg></span>`}
+      <div class="img${p.fit==='cover'?' cover':''}"${p.tint?` style="background:${p.tint}"`:''}>${p.img?`<img src="${escapeHtml(p.img)}" alt="${escapeHtml(p.name)}" loading="lazy"${p.pos?` style="object-position:${p.pos}"`:''} onerror="this.remove()">`:`<span class="mono" aria-hidden="true"><svg class="ic"><use href="#${p.icon||'i-package'}"/></svg></span>`}
         ${isSpon?`<span class="sponsored">Sponsored</span>`:''}
         ${d?`<span class="disc${isSpon?' below':''}">−${d}%</span>`:''}
         ${p.rx?`<span class="rxtag">Rx only</span>`:''}
@@ -985,9 +1005,9 @@ function renderGrid(){
         ${p.stock<=0?`<span class="oos">Out of stock</span>`:''}
       </div>
       <div class="card-body">
-        <div class="brandrow"><span>${p.brand}</span><span>${p.div}</span></div>
-        <div class="pname">${p.name}</div>
-        <div class="pack">${p.pack}</div>
+        <div class="brandrow"><span>${escapeHtml(p.brand)}</span><span>${escapeHtml(p.div)}</span></div>
+        <div class="pname">${escapeHtml(p.name)}</div>
+        <div class="pack">${escapeHtml(p.pack)}</div>
         <div class="pricerow"><span class="price"><small>KSh</small> ${priceNow.toLocaleString('en-KE')}</span>${p.old&&!p.tiers?`<span class="old">${ksh(p.old)}</span>`:''}</div>
         ${tierHtml}
         <div class="action"></div>
@@ -1005,6 +1025,7 @@ function renderGrid(){
     }
     g.appendChild(card);
   });
+  $('#moreWrap').hidden=ordered.length<=shown;
   function id2(p){return p.id;}
 }
 function renderCatsDrawer(){
@@ -1012,7 +1033,7 @@ function renderCatsDrawer(){
   $('#catsBody').innerHTML=`<div style="display:flex;gap:8px;flex-wrap:wrap">`+DIVS.map(d=>`<button class="chip ${state.div===d.id?'active':''}" data-d="${d.id}"><svg class="ic"><use href="#${d.icon}"/></svg> ${d.id}</button>`).join('')+`</div><hr style="border:none;border-top:1px solid var(--line);margin:12px 0">`
    +list.map(c=>`<button class="chip ${state.cat===c?'active':''}" data-c="${c}" style="margin:0 6px 8px 0">${c}</button>`).join('');
   $('#catsBody').querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{closeAll();selectDiv(b.dataset.d);});
-  $('#catsBody').querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{state.cat=b.dataset.c;closeAll();renderAll();});
+  $('#catsBody').querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{state.cat=b.dataset.c;resetVisible();closeAll();renderAll();});
 }
 function add(id,d){
   const p=prod(id);
@@ -1047,7 +1068,7 @@ function renderBasket(){
   ids.forEach(id=>{
     const p=prod(id),q=state.cart[id],u=unitPrice(p,q);
     const r=document.createElement('div'); r.className='brow';
-    r.innerHTML=`<div class="bi"${p.tint?` style="background:${p.tint}"`:''}>${p.img?`<img src="${p.img}" alt="" loading="lazy" onerror="this.remove()">`:`<span class="mono" aria-hidden="true"><svg class="ic"><use href="#${p.icon||'i-package'}"/></svg></span>`}</div><div class="bn">${p.name}<small>${p.pack} · ${ksh(u)} each</small><small><b>${ksh(u*q)}</b></small></div>`;
+    r.innerHTML=`<div class="bi"${p.tint?` style="background:${p.tint}"`:''}>${p.img?`<img src="${escapeHtml(p.img)}" alt="" loading="lazy" onerror="this.remove()">`:`<span class="mono" aria-hidden="true"><svg class="ic"><use href="#${p.icon||'i-package'}"/></svg></span>`}</div><div class="bn">${escapeHtml(p.name)}<small>${escapeHtml(p.pack)} · ${ksh(u)} each</small><small><b>${ksh(u*q)}</b></small></div>`;
     const m=document.createElement('div'); m.className='mini';
     m.innerHTML=`<button>−</button><strong>${q}</strong><button>+</button>`;
     m.querySelectorAll('button')[0].onclick=()=>add(id,-1);
@@ -1063,9 +1084,9 @@ function renderBasket(){
      <div class="ship-track"><i style="width:${pct}%"></i></div>
    </div>
    ${sug?`<div class="xrow">
-     <div class="bi">${sug.p.img?`<img src="${sug.p.img}" alt="" loading="lazy" onerror="this.remove()">`:`<span class="mono"><svg class="ic"><use href="#i-package"/></svg></span>`}</div>
-     <div class="bn">${sug.p.name}<small>${sug.reason} · ${ksh(sug.p.price)}</small></div>
-     <button class="xadd" type="button" data-x="${sug.p.id}">Add</button>
+     <div class="bi">${sug.p.img?`<img src="${escapeHtml(sug.p.img)}" alt="" loading="lazy" onerror="this.remove()">`:`<span class="mono"><svg class="ic"><use href="#i-package"/></svg></span>`}</div>
+     <div class="bn">${escapeHtml(sug.p.name)}<small>${sug.reason} · ${ksh(sug.p.price)}</small></div>
+     <button class="xadd" type="button" data-x="${escapeHtml(sug.p.id)}">Add</button>
    </div>`:''}
    <div class="totrow" style="margin-top:10px"><span>Subtotal</span><b>${ksh(sub)}</b></div>
    <div class="totrow"><span>Delivery (${state.area})</span><b>${del===0?'FREE':ksh(del)}</b></div>
@@ -1116,6 +1137,39 @@ function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('show')
 function openRx(){ closeAll(); openModal('#rxModal'); }
 function openClinic(){ closeAll(); openModal('#clinicModal'); }
 function renderAll(){ renderDivs(); renderChips(); renderGrid(); renderBasketMeta(); renderOfferBar(); }
+async function loadCatalogue(){
+  catalogueStatus='loading';
+  renderGrid();
+  try {
+    const response=await fetch('/api/catalogue',{cache:'no-store'});
+    if(!response.ok) throw new Error('The live catalogue could not be reached');
+    const result=await response.json();
+    if(!Array.isArray(result.products)) throw new Error('The live catalogue response was invalid');
+    PRODUCTS=result.products;
+    for(const div of DIVS.slice(1)){
+      const available=new Set(PRODUCTS.filter(p=>p.div===div.id).map(p=>p.cat));
+      const original=CATS[div.id].slice(1).filter(cat=>available.has(cat));
+      CATS[div.id]=['All',...original,...[...available].filter(cat=>!original.includes(cat))];
+    }
+    CATS.All=['All',...new Set(DIVS.slice(1).flatMap(div=>CATS[div.id].slice(1)))];
+    if(state.cat!=='All'&&state.cat!=='On offer'&&!CATS[state.div].includes(state.cat)) state.cat='All';
+    for(const [id,qty] of Object.entries(state.cart)){
+      const item=prod(id);
+      if(!item||item.stock<=0) delete state.cart[id];
+      else state.cart[id]=Math.min(qty,item.stock);
+    }
+    catalogueStatus='ready';
+    renderAll();
+    if($('#basketDrawer').classList.contains('show'))renderBasket();
+  } catch(error) {
+    console.error('Live catalogue unavailable:',error);
+    PRODUCTS=[];
+    state.cart={};
+    catalogueStatus='error';
+    renderAll();
+    if($('#basketDrawer').classList.contains('show'))renderBasket();
+  }
+}
 /* =====================================================================
    PROMO SLOTS. Replace the PROMOS object with real supplier bookings;
    nothing else here needs to change. Every slot is dismissible, remembered
@@ -1327,7 +1381,7 @@ if('IntersectionObserver' in window && $('#offerCarousel')){
   new IntersectionObserver(es=>{ adInView=es[0].isIntersecting; adTick(); },{threshold:.25}).observe($('#offerCarousel'));
 }
 /* EVENTS */
-$('#search').addEventListener('input',e=>{state.q=e.target.value.trim();renderGrid();});
+$('#search').addEventListener('input',e=>{state.q=e.target.value.trim();resetVisible();renderGrid();});
 $('#searchBtn').onclick=()=>{$('#main').scrollIntoView({behavior:'smooth',block:'start'});};
 $('#openBasket').onclick=()=>openDrawer('#basketDrawer');
 $('#closeBasket').onclick=closeAll;
@@ -1336,7 +1390,7 @@ document.querySelectorAll('[data-close]').forEach(b=>b.onclick=closeAll);
 
 $('#ageYes').onclick=()=>{
   state.age=true;closeAll();
-  if(window._pendingDiv){state.div=window._pendingDiv;state.cat='All';window._pendingDiv=null;renderAll();}
+  if(window._pendingDiv){state.div=window._pendingDiv;state.cat='All';window._pendingDiv=null;resetVisible();renderAll();}
   if(window._pendingScroll){window._pendingScroll=false;$('#grid').scrollIntoView({behavior:'smooth',block:'start'});}
   if(window._pendingAdd){const id=window._pendingAdd;window._pendingAdd=null;add(id,1);}
 };
@@ -1382,7 +1436,8 @@ $('#clDate').valueAsDate=new Date();
 /* header shortcuts + footer division links */
 $('#rtDeals').onclick=()=>goShop('Retail','On offer');
 $('#bulkBtn').onclick=()=>goShop('Wholesale');
-$('#sortSel').onchange=e=>{state.sort=e.target.value;renderGrid();};
+$('#sortSel').onchange=e=>{state.sort=e.target.value;resetVisible();renderGrid();};
+$('#moreBtn').onclick=()=>{shown+=48;renderGrid();};
 $('#navRx').onclick=openRx;
 $('#navClinics').onclick=openClinic;
 $('#navOrders').onclick=()=>openDrawer('#ordersDrawer');
@@ -1393,6 +1448,8 @@ document.querySelectorAll('.fbtn').forEach(b=>b.onclick=()=>{
 
 renderLeads();
 renderAll();
+loadCatalogue();
+setInterval(()=>{if(!document.hidden&&catalogueStatus==='ready')loadCatalogue();},60000);
 </script>
 </body>
 </html>

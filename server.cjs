@@ -2,6 +2,7 @@
 const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
+const { serveCatalogue } = require('./catalogue.cjs');
 
 const types = {
   '.html': 'text/html; charset=utf-8',
@@ -31,6 +32,7 @@ http.createServer((req, res) => {
     res.writeHead(400);
     return res.end('Bad request');
   }
+  if (pathname === '/api/catalogue') return serveCatalogue(req, res);
   if (pathname === '/') pathname = '/index.html';
   // Expose only the storefront, never repository files or configuration.
   if (pathname !== '/index.html' && !/^\/(assets|img)\//.test(pathname)) {
