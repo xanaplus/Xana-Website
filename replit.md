@@ -8,6 +8,14 @@ Xana Life is an online shop in Nairobi with five divisions: Pharmacy, Retail, De
 
 Today `index.html` is a working demo. The basket, checkout, orders, prescription upload and clinic booking all run only in the browser. Nothing is saved or sent anywhere. The goal is to make these real for a launch.
 
+## Run the imported demo on Replit
+
+- Click **Run** to start the **Xana Life demo** workflow, or run `node server.cjs`.
+- Open Preview. The server listens on `0.0.0.0:5000` and serves `index.html`, `assets/`, and `img/` only.
+- No dependency installation, build step, secrets, or external services are required for this demo. Node.js 20 is already configured.
+- The approved storefront is unchanged. Checkout, orders, prescription uploads, and clinic bookings remain browser-only simulations; they do not process payments or save/send customer data.
+- This server is for previewing the existing static demo, not the launch backend described below.
+
 ## Rules
 
 - **Do not change how the site looks.** No new sections, decoration, animation or restyling. The owner wants a simple shop that does not look AI-made. The layout decision is in `docs/adr/0001-products-first-calm-catalogue.md` and the ad rules are in `docs/adr/0002-ad-slots-and-ad-rules.md`. If something contradicts them, flag it instead of changing it.
