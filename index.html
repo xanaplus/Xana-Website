@@ -114,7 +114,7 @@ header.app{position:sticky;top:0;z-index:40;background:#fff;border-bottom:1px so
 .basketbtn .ic{font-size:19px}
 .basketbtn .cnt{background:#fff;color:var(--green);border-radius:999px;min-width:21px;height:21px;display:grid;place-items:center;font-size:12px;font-weight:700;padding:0 6px;font-variant-numeric:tabular-nums}
 .basketbtn .tot{font-size:13px;opacity:.9;font-variant-numeric:tabular-nums}
-/* division tabs: text, an underline for the active one, nothing more */
+/* division tabs: Pharmacy stays prominent; other tabs use an active underline */
 .tabs{border-top:1px solid var(--line-2)}
 .tabs-in{max-width:1320px;margin:0 auto;padding:0 18px;display:flex;align-items:center;gap:24px}
 .divtabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;min-width:0}
@@ -128,6 +128,12 @@ header.app{position:sticky;top:0;z-index:40;background:#fff;border-bottom:1px so
 .tab small{font-weight:500;color:var(--muted);font-size:12px;margin-left:3px;font-variant-numeric:tabular-nums}
 .tab:hover{color:var(--green)}
 .tab.active{color:var(--green);border-bottom-color:var(--green)}
+.tab.pharmacy-tab{display:inline-flex;align-items:center;gap:8px;min-height:44px;min-width:44px;margin:4px 0;padding:10px 12px;background:var(--green);color:#fff;border-bottom-color:transparent;border-radius:var(--rc)}
+.tab.pharmacy-tab .ic{width:18px;height:18px}
+.tab.pharmacy-tab small{margin:0;padding:2px 7px;background:#fff;color:var(--green-700);border-radius:999px;font-weight:700;line-height:1.4}
+.tab.pharmacy-tab:hover{background:var(--green-700);color:#fff}
+.tab.pharmacy-tab.active{box-shadow:inset 0 0 0 2px #fff,inset 0 0 0 4px var(--green-900)}
+.tab.pharmacy-tab:focus-visible{outline:3px solid var(--yellow);outline-offset:-6px}
 .tablinks{margin-left:auto;display:flex;gap:18px;flex:0 0 auto}
 .tablinks button{background:none;border:0;padding:0;cursor:pointer;font-size:13.5px;font-weight:600;color:var(--green);white-space:nowrap}
 .tablinks button:hover{text-decoration:underline;text-underline-offset:3px}
@@ -939,9 +945,9 @@ function renderDivs(){
   DIVS.forEach(d=>{
     const n = PRODUCTS.filter(p=>inDivision(p,d.id)).length;
     const b=document.createElement('button');
-    b.className='tab'+(state.div===d.id?' active':'');
+    b.className='tab'+(d.id==='Pharmacy'?' pharmacy-tab':'')+(state.div===d.id?' active':'');
     b.setAttribute('aria-pressed',state.div===d.id);
-    b.innerHTML=`<span>${d.id}</span> <small>${n.toLocaleString('en-KE')}</small>`;
+    b.innerHTML=`${d.id==='Pharmacy'?'<svg class="ic" aria-hidden="true"><use href="#i-pill"/></svg>':''}<span>${d.id}</span> <small>${n.toLocaleString('en-KE')}</small>`;
     b.onclick=()=>selectDiv(d.id);
     el.appendChild(b);
   });
