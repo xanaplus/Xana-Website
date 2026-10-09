@@ -304,6 +304,13 @@ header.app{position:sticky;top:0;z-index:40;background:#fff;border-bottom:1px so
 .offer-slide .offer-cta:hover{background:#EEF6F0}
 .offer-slide .offer-cta.dark{background:#1B1204;color:#fff}
 .offer-slide .offer-cta.dark:hover{background:var(--ink-2)}
+/* Clinic information is compact; product offer tiles keep their existing layout. */
+.offer-slide.offer-clinic{grid-template-columns:64px minmax(0,440px) auto;justify-content:start;gap:20px;background:var(--green-900);padding:22px}
+.offer-clinic .offer-art{width:64px;height:64px;border-radius:10px}
+.offer-clinic .offer-art .ic{font-size:34px}
+.offer-clinic .offer-actions{align-self:center;padding:0}
+.offer-clinic .offer-locations{font-size:13px;line-height:1.45;opacity:.86}
+.offers[data-tone="clinic"]{background:var(--green-900)}
 /* controls live in the bottom-right corner, clear of the product and the button */
 .offer-ui{position:absolute;right:22px;bottom:18px;display:none;align-items:center;gap:8px;z-index:4}
 .offers.ready .offer-ui{display:flex}
@@ -326,6 +333,10 @@ header.app{position:sticky;top:0;z-index:40;background:#fff;border-bottom:1px so
   .offer-actions{grid-column:1/-1;padding:0}
   .offer-ui{right:16px;bottom:18px}
   .offer-dots{display:none}
+  .offer-slide.offer-clinic{grid-template-columns:48px minmax(0,1fr);gap:12px;padding:18px 16px}
+  .offer-clinic .offer-art{width:48px;height:48px}
+  .offer-clinic .offer-art .ic{font-size:28px}
+  .offer-clinic .offer-actions{grid-column:2;padding:0}
 }
 @media(prefers-reduced-motion:reduce){.offer-view{transition:none}}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
@@ -475,6 +486,9 @@ nav.bottom{
 .mbox h2{font-size:20px;margin-bottom:6px}
 .mbox p{font-size:13.5px;color:var(--muted);text-wrap:pretty}
 .mbox .row2{display:flex;gap:9px;margin-top:18px}
+.clinic-details{margin:18px 0;display:grid;gap:12px}
+.clinic-details dt{font-size:12.5px;font-weight:600;color:var(--ink)}
+.clinic-details dd{margin:2px 0 0;font-size:14px;color:var(--muted)}
 .row2 .btn{flex:1}
 .field{margin:14px 0 0}
 .field label{font-size:12.5px;font-weight:600;display:block;margin-bottom:5px}
@@ -765,6 +779,18 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
   <div class="field"><label for="clPhone">Phone</label><input id="clPhone" placeholder="07..."></div>
   <div class="row2"><button class="btn w" type="button" data-close>Cancel</button><button class="btn g" id="clSubmit" type="button">Book visit, KSh 800</button></div>
   <div id="clDone"></div>
+</div></div>
+
+<div class="modal" id="clinicDetailsModal" role="dialog" aria-modal="true" aria-labelledby="clinicDetailsTitle" aria-describedby="clinicBookingNotice"><div class="mbox">
+  <svg class="ic mic" aria-hidden="true"><use href="#i-clinic"/></svg>
+  <h2 id="clinicDetailsTitle">Care close to home</h2>
+  <dl class="clinic-details">
+    <div><dt>Services</dt><dd>GP consultations, lab tests and vaccinations.</dd></div>
+    <div><dt>Locations</dt><dd>Ruaka · Kilimani · Kitengela Road</dd></div>
+    <div><dt>Hours</dt><dd>8am–8pm</dd></div>
+  </dl>
+  <p id="clinicBookingNotice">Appointment booking is unavailable online.</p>
+  <div class="row2"><button class="btn g" id="clinicDetailsClose" type="button" data-close>Close clinic details</button></div>
 </div></div>
 
 <div class="modal" id="locModal"><div class="mbox">
@@ -1159,10 +1185,21 @@ function renderOrders(){
 /* MODALS / DRAWERS */
 function openDrawer(s){ closeAll(true); $(s).classList.add('show'); $('#scrim').classList.add('show'); if(s==='#basketDrawer')renderBasket(); if(s==='#ordersDrawer')renderOrders(); if(s==='#catsDrawer')renderCatsDrawer(); }
 function openModal(s){ $('#scrim').classList.add('show'); $(s).classList.add('show'); }
- function closeAll(keepScrim){ document.querySelectorAll('.drawer,.modal').forEach(e=>e.classList.remove('show')); if(keepScrim!==true)$('#scrim').classList.remove('show'); }
+ function closeAll(keepScrim){ const detailsOpen=$('#clinicDetailsModal').classList.contains('show'); document.querySelectorAll('.drawer,.modal').forEach(e=>e.classList.remove('show')); if(keepScrim!==true)$('#scrim').classList.remove('show'); if(detailsOpen&&clinicDetailsTrigger)clinicDetailsTrigger.focus(); }
 function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),1600); }
 function openRx(){ closeAll(); openModal('#rxModal'); }
 function openClinic(){ closeAll(); openModal('#clinicModal'); }
+let clinicDetailsTrigger=null;
+function openClinicDetails(){
+  closeAll();
+  clinicDetailsTrigger=document.activeElement;
+  openModal('#clinicDetailsModal');
+  $('#clinicDetailsClose').focus();
+}
+$('#clinicDetailsModal').onkeydown=e=>{
+  if(e.key==='Escape'){e.preventDefault();closeAll();}
+  if(e.key==='Tab'){e.preventDefault();$('#clinicDetailsClose').focus();}
+};
 function renderAll(){ renderDivs(); renderChips(); renderGrid(); renderBasketMeta(); renderOfferBar(); }
 async function loadCatalogue(){
   // Keep usable cards visible during the periodic background refresh.
@@ -1220,8 +1257,9 @@ const PROMOS = {
      text:'{name} on the shelf at {price}',sub:'The 200g pack, in stock today and ready to ship.',cta:'Add to basket'},
     {id:'oil-carton',label:'Wholesale',brand:'Xana Trade',tone:'ink',sku:'w2',
      text:'{name} at {price}',sub:'Six 3L jerrycans per carton. Bulk tiers start at five cartons.',cta:'Add carton'},
-    {id:'clinic-visit',label:'Clinics',brand:'Xana Clinics',tone:'ink',action:'clinic',
-     text:'GP visits, lab tests and jabs',sub:'Walk in at Ruaka, Kilimani or Kitengela Road. Open 8am to 8pm.',cta:'Book a visit · KSh 800'}
+     {id:'clinic-visit',label:'Clinics',brand:'Xana Clinics',tone:'clinic',action:'clinic-details',
+      text:'Care close to home',sub:'GP consultations, lab tests and vaccinations.',
+      locations:'Ruaka · Kilimani · Kitengela Road',hours:'8am–8pm',cta:'View clinic details'}
   ],
   /* slot 3: sponsored shelf position, keyed to a real SKU */
   sponsored:[{id:'royco-instock',sku:'s8'}],
@@ -1289,7 +1327,7 @@ function adGoTo(i){
   if(prog){
     prog.style.setProperty('--ad-ms',adDelay(adAt(adIndex))+'ms');
     prog.classList.remove('run'); void prog.offsetWidth;
-    if(!adPaused()) prog.classList.add('run');
+    if(n>1&&!adPaused()) prog.classList.add('run');
   }
   const dots=document.querySelectorAll('#offerDots button');
   dots.forEach((b,k)=>{b.classList.toggle('on',k===adIndex);b.setAttribute('aria-current',k===adIndex?'true':'false');});
@@ -1298,6 +1336,7 @@ function adGoTo(i){
   renderOfferBar();
 }
 function adAct(a){
+  if(a.action==='clinic-details') return openClinicDetails();
   if(a.action==='clinic') return openClinic();
   if(a.action==='rx') return openRx();
   if(a.sku) return promoAdd(a.sku);
@@ -1311,6 +1350,7 @@ function renderAdCarousel(){
     return;
   }
   el.hidden=false;
+  const multiple=ads.length>1;
   el.innerHTML=`<div class="offer-view" id="offerView">${ads.map((a,i)=>{
     const p=a.sku?prod(a.sku):null;
     const text=p?fillPromo(a.text,p):a.text;
@@ -1318,25 +1358,27 @@ function renderAdCarousel(){
     const head=p?(a.title||p.name):text;
     const when=[a.label,a.until&&a.until.toLowerCase()].filter(Boolean).join(', ');
     const art=p&&p.img?productImageMarkup(p,{eager:true}):`<svg class="ic" aria-hidden="true"><use href="#${a.icon||(p&&p.icon)||(p?'i-package':'i-clinic')}"/></svg>`;
-    const price=p?`<p class="offer-price"><b>${ksh(p.price)}</b>${p.old?`<s>${ksh(p.old)}</s>`:''}${when?`<span>${when}</span>`:''}</p>`:(when?`<p class="offer-price"><span>${when}</span></p>`:'');
-    return `<article class="offer-slide tone-${a.tone||'green'}" role="group" aria-roledescription="slide" aria-label="${i+1} of ${ads.length}">
+    const clinic=a.action==='clinic-details';
+    const price=clinic?'':p?`<p class="offer-price"><b>${ksh(p.price)}</b>${p.old?`<s>${ksh(p.old)}</s>`:''}${when?`<span>${when}</span>`:''}</p>`:(when?`<p class="offer-price"><span>${when}</span></p>`:'');
+    return `<article class="offer-slide tone-${a.tone||'green'}${clinic?' offer-clinic':''}" role="group" aria-roledescription="slide" aria-label="${i+1} of ${ads.length}">
       <div class="offer-art">${art}</div>
       <div class="offer-copy">
         <h3 class="offer-h">${head}</h3>
         ${price}
         <p class="offer-sub">${sub||''}</p>
+        ${clinic?`<p class="offer-locations">${a.locations} · ${a.hours}</p>`:''}
       </div>
       <div class="offer-actions"><button class="btn offer-cta${a.tone==='gold'?' dark':''}" type="button" data-offer-cta="${i}">${a.cta}</button></div>
     </article>`;
   }).join('')}</div>
-  <div class="offer-ui">
+  <div class="offer-ui"${multiple?'':' hidden'}>
     <div class="offer-dots" id="offerDots">${ads.map((a,i)=>`<button type="button" class="${i===0?'on':''}" data-offer-dot="${i}" aria-label="Show offer ${i+1}" aria-current="${i===0?'true':'false'}"></button>`).join('')}</div>
     <div class="offer-nav">
       <button type="button" id="offerPrev" aria-label="Previous offer"><svg class="ic"><use href="#i-caret-left"/></svg></button>
       <button type="button" id="offerNext" aria-label="Next offer"><svg class="ic"><use href="#i-caret-right"/></svg></button>
     </div>
   </div>
-  <div class="offer-progress" id="offerProg"><i></i></div>`;
+  <div class="offer-progress" id="offerProg"${multiple?'':' hidden'}><i></i></div>`;
   el.classList.add('ready');
   el.querySelectorAll('[data-offer-cta]').forEach(b=>b.onclick=()=>adAct(ads[+b.dataset.offerCta]));
   el.querySelectorAll('[data-offer-dot]').forEach(b=>b.onclick=()=>{adGoTo(+b.dataset.offerDot);adTick();});
