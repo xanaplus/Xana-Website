@@ -8,3 +8,9 @@ The user wants this website to share the same database as the Xana Plus App. The
 **Why:** The user asked for a shared database.
 
 **How to apply:** Inspect the Xana Plus App's existing backend and data model before connecting the website. Do not create a separate source of truth or migrate the app's existing database without explicit permission. Leave customer accounts, orders, payment records, prescriptions, and clinic bookings outside this integration unless the user expands the scope.
+
+The user states: “bc is the source of truth.”
+
+**Why:** The user explicitly confirmed BC's authority when asked about conflicting catalogue classifications.
+
+**How to apply:** Treat BC as authoritative for shared catalogue data. Do not resolve conflicting BC fields by guessing from product names or adding independent website overrides. Corrections require authoritative BC changes before verifying the synced app and website results.
