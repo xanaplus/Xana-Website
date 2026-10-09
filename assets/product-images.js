@@ -20,14 +20,16 @@ function productImageFallback(image) {
   image.src = image.dataset.original;
 }
 
-function productImageMarkup(product, { thumbnail = false, eager = false, priority = false, alt = '' } = {}) {
+function productImageMarkup(product, { thumbnail = false, detail = false, eager = false, priority = false, alt = '' } = {}) {
   const escape = value => String(value).replace(/[&<>"']/g, char => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
   })[char]);
   const source = product.img;
-  const small = productImageUrl(source, thumbnail ? 96 : 320);
+  const small = productImageUrl(source, thumbnail ? 96 : detail ? 640 : 320);
   const responsive = !thumbnail && small !== source
-    ? ` srcset="${escape(small)} 320w, ${escape(productImageUrl(source, 640))} 640w" sizes="(max-width:699px) 46vw, (max-width:1099px) 30vw, 300px"`
+    ? detail
+      ? ` srcset="${escape(small)} 640w, ${escape(productImageUrl(source, 1024))} 1024w" sizes="(max-width:767px) 90vw, (max-width:1099px) 45vw, 440px"`
+      : ` srcset="${escape(small)} 320w, ${escape(productImageUrl(source, 640))} 640w" sizes="(max-width:699px) 46vw, (max-width:1099px) 30vw, 300px"`
     : '';
   return `<img src="${escape(small)}"${responsive} alt="${escape(alt)}" loading="${eager ? 'eager' : 'lazy'}" decoding="async" fetchpriority="${priority ? 'high' : 'auto'}" data-original="${escape(source)}" onerror="productImageFallback(this)">`;
 }

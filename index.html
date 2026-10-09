@@ -8,6 +8,7 @@
 <meta name="theme-color" content="#046938">
 <link rel="icon" href="img/app/xana-logo.png">
 <link rel="apple-touch-icon" href="img/app/xana-logo.png">
+<link rel="stylesheet" href="/assets/product-detail.css">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Xana Life · Every Day Better">
 <meta property="og:description" content="Pharmacy first, plus retail, deli, liquor, wholesale and clinics. One basket, delivered across Nairobi.">
@@ -563,7 +564,7 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
 
 <header class="app">
   <div class="hrow">
-    <a class="logo" href="#" onclick="return false" aria-label="Xana Life, home">
+    <a class="logo" href="/" data-product-browse aria-label="Xana Life, home">
       <img src="img/app/xana-logo.png" alt="Xana Life" width="904" height="712">
     </a>
     <div class="loc">
@@ -627,8 +628,9 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
   <section class="offers" id="offerCarousel" hidden role="region" aria-roledescription="carousel" aria-label="Offers"></section>
 
   <main id="main">
+    <section id="productDetail" hidden aria-label="Product details"></section>
     <div class="cat-head">
-      <h2 id="catTitle">All products</h2>
+      <h2 id="catTitle" tabindex="-1">All products</h2>
       <span class="count" id="resCount" role="status" aria-live="polite"></span>
       <label class="sort"><span class="sr-only">Sort products</span>
         <select id="sortSel">
@@ -779,6 +781,7 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
 
 <script src="assets/catalogue-rules.js"></script>
 <script src="/assets/product-images.js"></script>
+<script src="/assets/product-detail.js"></script>
 <script src="assets/site-motion.js"></script>
 <script>
 
@@ -923,7 +926,8 @@ const divCount=id=>PRODUCTS.filter(p=>inDivision(p,id)).length;
 const catCount=(div,cat)=>PRODUCTS.filter(p=>inDivision(p,div)&&inCategory(p,div,cat)).length;
 /* jump to the product grid with a division (and optionally a category) applied */
 function goShop(div,cat){
-  if(div==='Liquor'&&!state.age){ window._pendingDiv=div; window._pendingScroll=true; openModal('#ageModal'); return; }
+  window.XanaProductDetail?.browse();
+  if(div==='Liquor'&&!state.age){ window._pendingDiv=div; window._pendingCat=cat||'All'; window._pendingScroll=true; openModal('#ageModal'); return; }
   state.div=div; state.cat=cat||'All'; resetVisible(); renderAll();
   $('#main').scrollIntoView({behavior:adOff()?'auto':'smooth',block:'start'});
 }
@@ -935,7 +939,8 @@ function renderRxStatus(){
   el.querySelector('span').textContent=open?'Pharmacist on duty until 11pm':'Prescriptions are checked again from 7am. The Ruaka Bypass window is open all night.';
 }
 function selectDiv(id){
-  if(id==='Liquor' && !state.age){ openModal('#ageModal'); window._pendingDiv=id; return; }
+  window.XanaProductDetail?.browse();
+  if(id==='Liquor' && !state.age){ openModal('#ageModal'); window._pendingDiv=id; window._pendingCat='All'; return; }
   state.div=id; state.cat='All'; resetVisible(); renderAll();
   document.querySelectorAll('#bottomNav .navbtn').forEach(b=>b.classList.toggle('active',b.dataset.nav==='shop'));
 }
@@ -1027,16 +1032,16 @@ function renderGrid(){
     }
     const priceNow = p.tiers?unitPrice(p,Math.max(q,1)):p.price;
     card.innerHTML=`
-      <div class="img${p.fit==='cover'?' cover':''}"${p.tint?` style="background:${p.tint}"`:''}>${p.img?productImageMarkup(p,{alt:p.name,eager:index<4,priority:index<2}):`<span class="mono" aria-hidden="true"><svg class="ic"><use href="#${p.icon||'i-package'}"/></svg></span>`}
+      <a data-product-link href="${escapeHtml(window.XanaProductDetail.href(p.id))}" aria-label="${escapeHtml(p.name)}" class="img${p.fit==='cover'?' cover':''}"${p.tint?` style="background:${p.tint}"`:''}>${p.img?productImageMarkup(p,{alt:p.name,eager:index<4,priority:index<2}):`<span class="mono" aria-hidden="true"><svg class="ic"><use href="#${p.icon||'i-package'}"/></svg></span>`}
         ${isSpon?`<span class="sponsored">Sponsored</span>`:''}
         ${d?`<span class="disc${isSpon?' below':''}">−${d}%</span>`:''}
         ${p.rx?`<span class="rxtag">Rx only</span>`:''}
         ${p.age?`<span class="rxtag">18+</span>`:''}
         ${p.stock<=0?`<span class="oos">Out of stock</span>`:''}
-      </div>
+      </a>
       <div class="card-body">
         <div class="brandrow"><span>${escapeHtml(productCategory(p,state.div))}</span><span>${escapeHtml(p.tiers&&activeTier(p,q)>0?p.div+' · Wholesale price':p.div)}</span></div>
-        <div class="pname">${escapeHtml(p.name)}</div>
+        <a class="pname" data-product-link href="${escapeHtml(window.XanaProductDetail.href(p.id))}" style="color:inherit;text-decoration:none">${escapeHtml(p.name)}</a>
         <div class="pack">${escapeHtml(p.pack)}</div>
         <div class="pricerow"><span class="price"><small>KSh</small> ${priceNow.toLocaleString('en-KE')}</span>${p.old&&!p.tiers?`<span class="old">${ksh(p.old)}</span>`:''}</div>
         ${tierHtml}
@@ -1064,20 +1069,24 @@ function renderCatsDrawer(){
   $('#catsBody').innerHTML=`<div style="display:flex;gap:8px;flex-wrap:wrap">`+DIVS.map(d=>`<button class="chip ${state.div===d.id?'active':''}" data-d="${d.id}"><svg class="ic"><use href="#${d.icon}"/></svg> ${d.id}</button>`).join('')+`</div><hr style="border:none;border-top:1px solid var(--line);margin:12px 0">`
    +list.map(c=>`<button class="chip ${state.cat===c?'active':''}" data-c="${escapeHtml(c)}" style="margin:0 6px 8px 0">${escapeHtml(c)}</button>`).join('');
   $('#catsBody').querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{closeAll();selectDiv(b.dataset.d);});
-  $('#catsBody').querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{state.cat=b.dataset.c;resetVisible();closeAll();renderAll();});
+   $('#catsBody').querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{window.XanaProductDetail?.browse();state.cat=b.dataset.c;resetVisible();closeAll();renderAll();});
 }
 function add(id,d){
   const p=prod(id);
+  if(!p||!Number.isInteger(d)) return false;
+  if(d>0&&p.stock<=0){toast('Out of stock');return false;}
+  if(d>0&&p.rx){openRx();return false;}
   /* the age check happens at the moment of buying, wherever the liquor item is shown */
-  if(d>0&&p.age&&!state.age){ window._pendingAdd=id; openModal('#ageModal'); return; }
+  if(d>0&&p.age&&!state.age){ window._pendingAdd=id; window._pendingAddQty=d; openModal('#ageModal'); return false; }
   const q=(state.cart[id]||0)+d;
   if(q<=0) delete state.cart[id];
-  else if(q>p.stock){ toast(`Only ${p.stock} left`); return; }
+  else if(q>p.stock){ toast(`Only ${p.stock} left`); return false; }
   else state.cart[id]=q;
   if(d>0) toast(`Added ${p.name}`);
   renderAll(false);
   /* keep an open basket drawer in sync, so the top-up row and delivery bar update in place */
   if($('#basketDrawer').classList.contains('show')) renderBasket();
+  return true;
 }
 let lastCount=0;
 function bump(el){ el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
@@ -1159,16 +1168,17 @@ function renderOrders(){
 /* MODALS / DRAWERS */
 function openDrawer(s){ closeAll(true); $(s).classList.add('show'); $('#scrim').classList.add('show'); if(s==='#basketDrawer')renderBasket(); if(s==='#ordersDrawer')renderOrders(); if(s==='#catsDrawer')renderCatsDrawer(); }
 function openModal(s){ $('#scrim').classList.add('show'); $(s).classList.add('show'); }
- function closeAll(keepScrim){ document.querySelectorAll('.drawer,.modal').forEach(e=>e.classList.remove('show')); if(keepScrim!==true)$('#scrim').classList.remove('show'); }
+ function closeAll(keepScrim){ document.querySelectorAll('.drawer,.modal').forEach(e=>e.classList.remove('show')); if(keepScrim!==true)$('#scrim').classList.remove('show'); window._pendingAdd=null;window._pendingAddQty=null;window._pendingDiv=null;window._pendingCat=null;window._pendingScroll=false; }
 function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),1600); }
 function openRx(){ closeAll(); openModal('#rxModal'); }
 function openClinic(){ closeAll(); openModal('#clinicModal'); }
-function renderAll(){ renderDivs(); renderChips(); renderGrid(); renderBasketMeta(); renderOfferBar(); }
+function renderAll(){ renderDivs(); renderChips(); renderGrid(); renderBasketMeta(); renderOfferBar(); window.XanaProductDetail?.render(); }
 async function loadCatalogue(){
   // Keep usable cards visible during the periodic background refresh.
   if(catalogueStatus!=='ready'){
     catalogueStatus='loading';
     renderGrid();
+    window.XanaProductDetail?.render();
   }
   try {
     const response=await fetch('/api/catalogue',{cache:'no-store'});
@@ -1432,20 +1442,21 @@ if('IntersectionObserver' in window && $('#offerCarousel')){
   new IntersectionObserver(es=>{ adInView=es[0].isIntersecting; adTick(); },{threshold:.25}).observe($('#offerCarousel'));
 }
 /* EVENTS */
-$('#search').addEventListener('input',e=>{state.q=e.target.value.trim();resetVisible();renderGrid();});
-$('#searchBtn').onclick=()=>{$('#main').scrollIntoView({behavior:adOff()?'auto':'smooth',block:'start'});};
+$('#search').addEventListener('input',e=>{window.XanaProductDetail?.browse();state.q=e.target.value.trim();resetVisible();renderGrid();});
+$('#searchBtn').onclick=()=>{window.XanaProductDetail?.browse();$('#main').scrollIntoView({behavior:adOff()?'auto':'smooth',block:'start'});};
 $('#openBasket').onclick=()=>openDrawer('#basketDrawer');
 $('#closeBasket').onclick=closeAll;
 $('#scrim').onclick=closeAll;
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=closeAll);
 
 $('#ageYes').onclick=()=>{
+  const pendingDiv=window._pendingDiv,pendingCat=window._pendingCat,pendingScroll=window._pendingScroll,pendingAdd=window._pendingAdd,pendingQty=window._pendingAddQty||1;
   state.age=true;closeAll();
-  if(window._pendingDiv){state.div=window._pendingDiv;state.cat='All';window._pendingDiv=null;resetVisible();renderAll();}
-  if(window._pendingScroll){window._pendingScroll=false;$('#grid').scrollIntoView({behavior:adOff()?'auto':'smooth',block:'start'});}
-  if(window._pendingAdd){const id=window._pendingAdd;window._pendingAdd=null;add(id,1);}
+  if(pendingDiv){state.div=pendingDiv;state.cat=pendingCat||'All';resetVisible();renderAll();}
+  if(pendingScroll){$('#grid').scrollIntoView({behavior:adOff()?'auto':'smooth',block:'start'});}
+  if(pendingAdd)add(pendingAdd,pendingQty);
 };
-$('#ageNo').onclick=()=>{closeAll();window._pendingDiv=null;window._pendingScroll=false;window._pendingAdd=null;};
+$('#ageNo').onclick=()=>{closeAll();window._pendingDiv=null;window._pendingScroll=false;window._pendingAdd=null;window._pendingAddQty=null;};
 /* "Ask a pharmacist" stays hidden until PROMOS.pharmacist.whatsapp holds a number */
 (function(){
   const raw=(PROMOS.pharmacist.whatsapp||'').replace(/[^\d+]/g,'');
@@ -1477,6 +1488,7 @@ function renderLoc(){
 document.querySelectorAll('#bottomNav .navbtn').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('#bottomNav .navbtn').forEach(x=>x.classList.remove('active')); b.classList.add('active');
   const n=b.dataset.nav;
+  if(['shop','cats','pharmacy'].includes(n))window.XanaProductDetail?.browse();
   if(n==='shop'){closeAll();window.scrollTo({top:0,behavior:adOff()?'auto':'smooth'});}
   if(n==='cats')openDrawer('#catsDrawer');
   if(n==='pharmacy'){closeAll();$('#pharmacy').scrollIntoView({behavior:adOff()?'auto':'smooth',block:'start'});}

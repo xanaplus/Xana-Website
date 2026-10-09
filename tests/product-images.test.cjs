@@ -63,6 +63,10 @@ test('responsive cards prioritize first images and thumbnails request only 96px'
   assert.match(thumb, /w=96/);
   assert.ok(!thumb.includes('srcset'));
   assert.match(productImageMarkup({ img: original }), /loading="lazy"/);
+  const detail = productImageMarkup({ img: original }, { detail: true, eager: true });
+  assert.match(detail, /w=640/);
+  assert.match(detail, /w=1024/);
+  assert.ok(imageRequest('/api/product-image?file=product_test.jpg&w=1024'));
 });
 
 test('an optimizer failure tries the original once without a retry loop', () => {

@@ -25,7 +25,7 @@ function imageRequest(url) {
   const file = params.get('file') || '';
   const width = Number(params.get('w'));
   if (!/^[a-zA-Z0-9_-]+\.(?:jpe?g|png|webp)$/i.test(file) ||
-      file.length > 180 || ![96, 320, 640].includes(width)) return null;
+      file.length > 180 || ![96, 320, 640, 1024].includes(width)) return null;
   return { file, width, key: `${file}:${width}` };
 }
 
