@@ -520,6 +520,7 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
 .credits{font-size:11.5px;color:var(--muted-2);margin-top:6px}
 @media(max-width:700px){.fgrid{grid-template-columns:1fr 1fr}}
 </style>
+<link rel="stylesheet" href="assets/site-motion.css">
 </head>
 <body>
 
@@ -778,6 +779,7 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
 
 <script src="assets/catalogue-rules.js"></script>
 <script src="/assets/product-images.js"></script>
+<script src="assets/site-motion.js"></script>
 <script>
 
 /* the five divisions, in the app's order. Pharmacy and Retail lead as panels;
@@ -923,7 +925,7 @@ const catCount=(div,cat)=>PRODUCTS.filter(p=>inDivision(p,div)&&inCategory(p,div
 function goShop(div,cat){
   if(div==='Liquor'&&!state.age){ window._pendingDiv=div; window._pendingScroll=true; openModal('#ageModal'); return; }
   state.div=div; state.cat=cat||'All'; resetVisible(); renderAll();
-  $('#main').scrollIntoView({behavior:'smooth',block:'start'});
+  $('#main').scrollIntoView({behavior:adOff()?'auto':'smooth',block:'start'});
 }
 /* Pharmacy and Retail row: only the pharmacy's open/overnight line is dynamic */
 function renderLeads(){ renderRxStatus(); }
@@ -1017,6 +1019,7 @@ function renderGrid(){
     const d=disc(p);
     const isSpon = !!(spon&&p.id===spon.id);
     const card=document.createElement('div'); card.className='card';
+    card.dataset.motionProduct=String(p.id);
     let tierHtml='';
     if(p.tiers){
       const on=activeTier(p,Math.max(q,1));
@@ -1053,6 +1056,7 @@ function renderGrid(){
     g.appendChild(card);
   });
   $('#moreWrap').hidden=ordered.length<=shown;
+  if(typeof window!=='undefined'&&window.XanaMotion) window.XanaMotion.registerGrid(g);
   function id2(p){return p.id;}
 }
 function renderCatsDrawer(){
@@ -1412,7 +1416,7 @@ if('IntersectionObserver' in window && $('#offerCarousel')){
 }
 /* EVENTS */
 $('#search').addEventListener('input',e=>{state.q=e.target.value.trim();resetVisible();renderGrid();});
-$('#searchBtn').onclick=()=>{$('#main').scrollIntoView({behavior:'smooth',block:'start'});};
+$('#searchBtn').onclick=()=>{$('#main').scrollIntoView({behavior:adOff()?'auto':'smooth',block:'start'});};
 $('#openBasket').onclick=()=>openDrawer('#basketDrawer');
 $('#closeBasket').onclick=closeAll;
 $('#scrim').onclick=closeAll;
@@ -1421,7 +1425,7 @@ document.querySelectorAll('[data-close]').forEach(b=>b.onclick=closeAll);
 $('#ageYes').onclick=()=>{
   state.age=true;closeAll();
   if(window._pendingDiv){state.div=window._pendingDiv;state.cat='All';window._pendingDiv=null;resetVisible();renderAll();}
-  if(window._pendingScroll){window._pendingScroll=false;$('#grid').scrollIntoView({behavior:'smooth',block:'start'});}
+  if(window._pendingScroll){window._pendingScroll=false;$('#grid').scrollIntoView({behavior:adOff()?'auto':'smooth',block:'start'});}
   if(window._pendingAdd){const id=window._pendingAdd;window._pendingAdd=null;add(id,1);}
 };
 $('#ageNo').onclick=()=>{closeAll();window._pendingDiv=null;window._pendingScroll=false;window._pendingAdd=null;};
@@ -1456,9 +1460,9 @@ function renderLoc(){
 document.querySelectorAll('#bottomNav .navbtn').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('#bottomNav .navbtn').forEach(x=>x.classList.remove('active')); b.classList.add('active');
   const n=b.dataset.nav;
-  if(n==='shop'){closeAll();window.scrollTo({top:0,behavior:'smooth'});}
+  if(n==='shop'){closeAll();window.scrollTo({top:0,behavior:adOff()?'auto':'smooth'});}
   if(n==='cats')openDrawer('#catsDrawer');
-  if(n==='pharmacy'){closeAll();$('#pharmacy').scrollIntoView({behavior:'smooth',block:'start'});}
+  if(n==='pharmacy'){closeAll();$('#pharmacy').scrollIntoView({behavior:adOff()?'auto':'smooth',block:'start'});}
   if(n==='orders')openDrawer('#ordersDrawer');
   if(n==='basket')openDrawer('#basketDrawer');
 });

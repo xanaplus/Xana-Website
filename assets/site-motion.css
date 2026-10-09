@@ -1,0 +1,67 @@
+/* Xana's existing palette, composition and photo treatment stay unchanged.
+   Progressive enhancement: nothing is hidden while waiting for JavaScript/IO. */
+:root{
+  --motion-ease:cubic-bezier(.22,.8,.28,1);
+  --motion-fast:140ms;
+}
+@media(prefers-reduced-motion:no-preference){
+  /* Keep the existing colour feedback; only new transitions use transform/opacity. */
+  :is(.btn,.basketbtn,.addbtn,.chip,.tab,.navbtn,.ob-cta,.offer-nav button,
+    .stepper button,.mini button,.dhead button,.tablinks button,.tlink,.fbtn,
+    .searchbox button,.xadd,.ob-x,.loc-txt button){
+    transition-property:transform,opacity;
+    transition-duration:var(--motion-fast);
+    transition-timing-function:var(--motion-ease);
+  }
+  .card:not(.skeleton-card){transition:transform 180ms var(--motion-ease)}
+  :where(.chip,.tab,.navbtn,.ob-cta,.offer-nav button,.stepper button,.mini button,
+    .dhead button,.tablinks button,.tlink,.fbtn,.searchbox button,.xadd,.ob-x,
+    .loc-txt button):not(:disabled):active{transform:translateY(1px)}
+  .motion-enter{
+    animation:siteEnter 240ms var(--motion-ease);
+    animation-delay:var(--motion-delay,0ms);
+    /* No backwards fill: delayed content is already fully visible/clickable. */
+  }
+  @keyframes siteEnter{
+    from{opacity:.86;transform:translateY(6px)}
+    to{opacity:1;transform:translateY(0)}
+  }
+  /* Reuse existing animation names/classes rather than layering new effects. */
+  .drawer.show{animation-duration:240ms;animation-timing-function:var(--motion-ease)}
+  @keyframes drawerUp{from{opacity:.86;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes drawerIn{from{opacity:.86;transform:translateX(14px)}to{opacity:1;transform:translateX(0)}}
+  .modal.show .mbox{animation-duration:220ms;animation-timing-function:var(--motion-ease)}
+  @keyframes modalIn{from{opacity:.86;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .scrim.show{animation-duration:160ms}
+  .toast.show{animation-duration:200ms}
+  @keyframes toastIn{from{opacity:.86;transform:translate(-50%,6px)}to{opacity:1;transform:translate(-50%,0)}}
+  .bump{animation-duration:260ms;animation-timing-function:var(--motion-ease)}
+  @keyframes bump{0%,100%{transform:scale(1)}40%{transform:scale(1.16)}}
+  /* Preserve existing carousel controls/timing; add no decorative looping motion. */
+  .offer-view{transition-duration:320ms}
+}
+@media(hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+  .card:not(.skeleton-card):hover{transform:translateY(-2px)}
+  :where(.btn,.basketbtn,.addbtn,.chip,.tab,.ob-cta,.offer-nav button,
+    .stepper button,.mini button,.dhead button,.tablinks button,.tlink,.fbtn,
+    .searchbox button,.xadd,.ob-x,.loc-txt button):not(:disabled):hover{
+    transform:translateY(-1px);
+  }
+  .navbtn:hover{transform:translateY(-1px)}
+  :where(.btn,.basketbtn,.addbtn,.chip,.tab,.navbtn,.ob-cta,.offer-nav button,
+    .stepper button,.mini button,.dhead button,.tablinks button,.tlink,.fbtn,
+    .searchbox button,.xadd,.ob-x,.loc-txt button):not(:disabled):active{
+    transform:translateY(1px);
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto!important}
+  .motion-enter,.drawer.show,.modal.show .mbox,.scrim.show,.toast.show,.bump{
+    animation:none!important;
+  }
+  :where(.card,.btn,.basketbtn,.addbtn,.chip,.tab,.navbtn,.ob-cta,.offer-nav button,
+    .stepper button,.mini button,.dhead button,.tablinks button,.tlink,.fbtn,
+    .searchbox button,.xadd,.ob-x,.loc-txt button){
+    transition:none!important;transform:none!important;
+  }
+}
