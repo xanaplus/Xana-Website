@@ -1,0 +1,11 @@
+{
+  "name": "xana-website",
+  "private": true,
+  "scripts": {
+    "start": "node server.cjs",
+    "test": "node --test tests/*.test.cjs"
+  },
+  "dependencies": {
+    "sharp": "^0.35.5"
+  }
+}

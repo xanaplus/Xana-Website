@@ -777,6 +777,7 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
 
 
 <script src="assets/catalogue-rules.js"></script>
+<script src="/assets/product-images.js"></script>
 <script>
 
 /* the five divisions, in the app's order. Pharmacy and Retail lead as panels;
@@ -1011,7 +1012,7 @@ function renderGrid(){
   renderTakeover();
   if(!ordered.length){ g.innerHTML=`<div class="empty" style="grid-column:1/-1"><svg class="ic ic-lg"><use href="#i-search"/></svg><b>No products found</b><span>Try a different search, or clear the filters.</span></div>`; return; }
   g.innerHTML='';
-  ordered.slice(0,shown).forEach(p=>{
+  ordered.slice(0,shown).forEach((p,index)=>{
     const q=state.cart[p.id]||0;
     const d=disc(p);
     const isSpon = !!(spon&&p.id===spon.id);
@@ -1023,7 +1024,7 @@ function renderGrid(){
     }
     const priceNow = p.tiers?unitPrice(p,Math.max(q,1)):p.price;
     card.innerHTML=`
-      <div class="img${p.fit==='cover'?' cover':''}"${p.tint?` style="background:${p.tint}"`:''}>${p.img?`<img src="${escapeHtml(p.img)}" alt="${escapeHtml(p.name)}" loading="lazy"${p.pos?` style="object-position:${p.pos}"`:''} onerror="this.remove()">`:`<span class="mono" aria-hidden="true"><svg class="ic"><use href="#${p.icon||'i-package'}"/></svg></span>`}
+      <div class="img${p.fit==='cover'?' cover':''}"${p.tint?` style="background:${p.tint}"`:''}>${p.img?productImageMarkup(p,{alt:p.name,eager:index<4,priority:index<2}):`<span class="mono" aria-hidden="true"><svg class="ic"><use href="#${p.icon||'i-package'}"/></svg></span>`}
         ${isSpon?`<span class="sponsored">Sponsored</span>`:''}
         ${d?`<span class="disc${isSpon?' below':''}">−${d}%</span>`:''}
         ${p.rx?`<span class="rxtag">Rx only</span>`:''}
@@ -1094,7 +1095,7 @@ function renderBasket(){
   ids.forEach(id=>{
     const p=prod(id),q=state.cart[id],u=unitPrice(p,q);
     const r=document.createElement('div'); r.className='brow';
-    r.innerHTML=`<div class="bi"${p.tint?` style="background:${p.tint}"`:''}>${p.img?`<img src="${escapeHtml(p.img)}" alt="" loading="lazy" onerror="this.remove()">`:`<span class="mono" aria-hidden="true"><svg class="ic"><use href="#${p.icon||'i-package'}"/></svg></span>`}</div><div class="bn">${escapeHtml(p.name)}<small>${escapeHtml(p.pack)} · ${ksh(u)} each${activeTier(p,q)>0?' · Wholesale price':''}</small><small><b>${ksh(u*q)}</b></small></div>`;
+    r.innerHTML=`<div class="bi"${p.tint?` style="background:${p.tint}"`:''}>${p.img?productImageMarkup(p,{thumbnail:true,eager:true}):`<span class="mono" aria-hidden="true"><svg class="ic"><use href="#${p.icon||'i-package'}"/></svg></span>`}</div><div class="bn">${escapeHtml(p.name)}<small>${escapeHtml(p.pack)} · ${ksh(u)} each${activeTier(p,q)>0?' · Wholesale price':''}</small><small><b>${ksh(u*q)}</b></small></div>`;
     const m=document.createElement('div'); m.className='mini';
     m.innerHTML=`<button>−</button><strong>${q}</strong><button>+</button>`;
     m.querySelectorAll('button')[0].onclick=()=>add(id,-1);
@@ -1110,7 +1111,7 @@ function renderBasket(){
      <div class="ship-track"><i style="width:${pct}%"></i></div>
    </div>
    ${sug?`<div class="xrow">
-     <div class="bi">${sug.p.img?`<img src="${escapeHtml(sug.p.img)}" alt="" loading="lazy" onerror="this.remove()">`:`<span class="mono"><svg class="ic"><use href="#i-package"/></svg></span>`}</div>
+     <div class="bi">${sug.p.img?productImageMarkup(sug.p,{thumbnail:true,eager:true}):`<span class="mono"><svg class="ic"><use href="#i-package"/></svg></span>`}</div>
      <div class="bn">${escapeHtml(sug.p.name)}<small>${sug.reason} · ${ksh(sug.p.price)}</small></div>
      <button class="xadd" type="button" data-x="${escapeHtml(sug.p.id)}">Add</button>
    </div>`:''}
@@ -1312,7 +1313,7 @@ function renderAdCarousel(){
     const sub=p?fillPromo(a.sub,p):a.sub;
     const head=p?(a.title||p.name):text;
     const when=[a.label,a.until&&a.until.toLowerCase()].filter(Boolean).join(', ');
-    const art=p&&p.img?`<img src="${p.img}" alt="" loading="lazy"${p.pos?` style="object-position:${p.pos}"`:''}>`:`<svg class="ic" aria-hidden="true"><use href="#${a.icon||(p&&p.icon)||(p?'i-package':'i-clinic')}"/></svg>`;
+    const art=p&&p.img?productImageMarkup(p,{eager:true}):`<svg class="ic" aria-hidden="true"><use href="#${a.icon||(p&&p.icon)||(p?'i-package':'i-clinic')}"/></svg>`;
     const price=p?`<p class="offer-price"><b>${ksh(p.price)}</b>${p.old?`<s>${ksh(p.old)}</s>`:''}${when?`<span>${when}</span>`:''}</p>`:(when?`<p class="offer-price"><span>${when}</span></p>`:'');
     return `<article class="offer-slide tone-${a.tone||'green'}" role="group" aria-roledescription="slide" aria-label="${i+1} of ${ads.length}">
       <div class="offer-art">${art}</div>

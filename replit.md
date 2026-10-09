@@ -29,6 +29,10 @@ Today `index.html` is a working demo. The basket, checkout, orders, prescription
 - Never name a class or id after ads (`ad-*`, `banner-ad` and similar). Ad blockers hide them.
 - Prices are in KSh. Show "KSh", never "KES".
 
+## Product image delivery
+
+Run `npm ci` before starting the server. `sharp` generates uncropped WebP copies at 96, 320 and 640 pixels via `/api/product-image`, shared by Replit and Vercel. Only product filenames from the existing Xana image host are accepted; redirects and arbitrary URLs are rejected. Responses are browser/CDN cached and the server keeps a bounded short-lived cache. The client uses responsive sizes, prioritizes the first cards and retries the original URL if optimization fails. Original photos and BC data are unchanged.
+
 ## Where the demo code is in `index.html`
 
 | What | Where |

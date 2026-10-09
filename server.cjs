@@ -1,8 +1,9 @@
-// Dependency-free preview server for the imported static storefront.
+// Preview server for the storefront and shared API handlers.
 const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
 const { serveCatalogue } = require('./catalogue.cjs');
+const { serveProductImage } = require('./product-image.cjs');
 
 const types = {
   '.html': 'text/html; charset=utf-8',
@@ -33,6 +34,7 @@ http.createServer((req, res) => {
     return res.end('Bad request');
   }
   if (pathname === '/api/catalogue') return serveCatalogue(req, res);
+  if (pathname === '/api/product-image') return serveProductImage(req, res);
   if (pathname === '/') pathname = '/index.html';
   // Expose only the storefront, never repository files or configuration.
   if (pathname !== '/index.html' && !/^\/(assets|img)\//.test(pathname)) {
@@ -59,7 +61,7 @@ http.createServer((req, res) => {
     res.writeHead(200, {
       'Content-Type': types[path.extname(file).toLowerCase()] || 'application/octet-stream',
       'Content-Length': stat.size,
-      'Cache-Control': 'no-store',
+      'Cache-Control': pathname === '/index.html' ? 'no-store' : 'public, max-age=86400',
       'X-Content-Type-Options': 'nosniff',
     });
     if (req.method === 'HEAD') {
