@@ -128,12 +128,8 @@ header.app{position:sticky;top:0;z-index:40;background:#fff;border-bottom:1px so
 .tab small{font-weight:500;color:var(--muted);font-size:12px;margin-left:3px;font-variant-numeric:tabular-nums}
 .tab:hover{color:var(--green)}
 .tab.active{color:var(--green);border-bottom-color:var(--green)}
-.tab.pharmacy-tab{display:inline-flex;align-items:center;gap:8px;min-height:44px;min-width:44px;margin:4px 0;padding:10px 12px;background:var(--green);color:#fff;border-bottom-color:transparent;border-radius:var(--rc)}
-.tab.pharmacy-tab .ic{width:18px;height:18px}
-.tab.pharmacy-tab small{margin:0;padding:2px 7px;background:#fff;color:var(--green-700);border-radius:999px;font-weight:700;line-height:1.4}
-.tab.pharmacy-tab:hover{background:var(--green-700);color:#fff}
-.tab.pharmacy-tab.active{box-shadow:inset 0 0 0 2px #fff,inset 0 0 0 4px var(--green-900)}
-.tab.pharmacy-tab:focus-visible{outline:3px solid var(--yellow);outline-offset:-6px}
+.tab.pharmacy-tab{font-size:16px;font-weight:750;color:var(--green)}
+.tab.pharmacy-tab:hover,.tab.pharmacy-tab.active{background:#EEF6F0}
 .tablinks{margin-left:auto;display:flex;gap:18px;flex:0 0 auto}
 .tablinks button{background:none;border:0;padding:0;cursor:pointer;font-size:13.5px;font-weight:600;color:var(--green);white-space:nowrap}
 .tablinks button:hover{text-decoration:underline;text-underline-offset:3px}
@@ -947,7 +943,7 @@ function renderDivs(){
     const b=document.createElement('button');
     b.className='tab'+(d.id==='Pharmacy'?' pharmacy-tab':'')+(state.div===d.id?' active':'');
     b.setAttribute('aria-pressed',state.div===d.id);
-    b.innerHTML=`${d.id==='Pharmacy'?'<svg class="ic" aria-hidden="true"><use href="#i-pill"/></svg>':''}<span>${d.id}</span> <small>${n.toLocaleString('en-KE')}</small>`;
+    b.innerHTML=`<span>${d.id}</span> <small>${n.toLocaleString('en-KE')}</small>`;
     b.onclick=()=>selectDiv(d.id);
     el.appendChild(b);
   });
