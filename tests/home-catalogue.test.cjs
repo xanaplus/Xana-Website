@@ -97,7 +97,7 @@ function navigation() {
     $,state,window,adOff:()=>true,resetVisible(){},
     renderAll(){rendered++;},openModal(selector){modal=selector;},
   });
-  vm.runInContext(inline.slice(inline.indexOf('function goShop(div,cat){'),inline.indexOf('/* Pharmacy and Retail row')),context);
+  vm.runInContext(inline.slice(inline.indexOf('function goShop(div,cat){'),inline.indexOf('function selectDiv(')),context);
   return {nodes,$,state,window,context,go:context.goShop,
     get browsed(){return browsed;},get rendered(){return rendered;},get modal(){return modal;}};
 }

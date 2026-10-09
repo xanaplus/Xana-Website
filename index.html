@@ -162,7 +162,7 @@ header.app{position:sticky;top:0;z-index:40;background:#fff;border-bottom:1px so
 .lead h2{font-size:20px;font-weight:800;letter-spacing:-.01em;line-height:1.15}
 .lead-lede{font-size:13.5px;line-height:1.4;color:var(--muted);margin-top:3px;text-wrap:pretty}
 .lead-status{font-size:12.5px;font-weight:600;color:var(--green);margin-top:4px}
-.lead-status.late{color:var(--muted)}
+.lead-status a,footer a,.mbox p a{color:inherit;text-decoration:underline;text-underline-offset:2px;white-space:nowrap}
 .lead-acts{display:flex;flex-direction:column;align-items:stretch;gap:6px}
 .lead-acts .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 16px;font-size:14px;white-space:nowrap}
 .lead-acts .btn .ic{font-size:15px}
@@ -588,7 +588,7 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
 
 <div class="wrap">
 
-  <h1 class="sr-only">Xana Life pharmacy, retail, deli, liquor and wholesale in Nairobi, with clinic visits at three branches</h1>
+  <h1 class="sr-only">Xana Life pharmacy, retail, deli, liquor and wholesale in Nairobi, with clinics at the Syokimau and Ruiru branches</h1>
 
   <section class="home-shop" id="homeShop" aria-labelledby="homeTitle">
     <div class="home-heading">
@@ -611,7 +611,7 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
       <div class="lead-copy">
         <h2 id="rxH">Pharmacy</h2>
         <p class="lead-lede">Prescription medicines need a pharmacist’s approval.</p>
-        <p class="lead-status" id="rxStatus"><span></span></p>
+        <p class="lead-status" id="rxStatus">Branches close at 9pm. Call the branch pharmacy to check pharmacist availability: Syokimau <a href="tel:+254718555554">+254 718 555554</a> · Ruiru <a href="tel:+254142631157">+254 142 631157</a></p>
       </div>
       <div class="lead-acts">
         <button class="btn g" id="rbUpload" type="button"><svg class="ic"><use href="#i-rx"/></svg> Prescription information</button>
@@ -658,7 +658,7 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
       <div>
         <b class="fbrand">xana life</b>
         <p>Pharmacy · Retail · Deli · Liquor · Wholesale · Clinics</p>
-        <p>Nairobi, Kiambu and Kajiado counties, Kenya.</p>
+        <p>Syokimau and Ruiru, Kenya.</p>
       </div>
       <div>
         <h4>Shop</h4>
@@ -670,8 +670,9 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
       </div>
       <div>
         <h4>Visit</h4>
-        <p>Ruaka Bypass · Kilimani · Industrial Area · Kitengela Road</p>
-        <p>Shops daily 7am to 11pm. Clinics 8am to 8pm.</p>
+        <p><a href="https://maps.app.goo.gl/qQ2vt4YnCeduG5iC6" target="_blank" rel="noopener">Syokimau, Bellway Park</a>: <a href="tel:+254718666661">+254 718 666661</a>. Pharmacy <a href="tel:+254718555554">+254 718 555554</a>.</p>
+        <p><a href="https://maps.app.goo.gl/Sr4hZEDDS2518sbs6" target="_blank" rel="noopener">Ruiru</a>: <a href="tel:+254718555559">+254 718 555559</a>. Pharmacy <a href="tel:+254142631157">+254 142 631157</a>.</p>
+        <p>Both branches have a clinic. Shops close at 9pm. Call the branch to confirm opening and clinic hours.</p>
       </div>
     </div>
     <section class="capture" id="capture" hidden aria-label="Weekly deals list">
@@ -686,7 +687,7 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
       </form>
       <p class="cap-note" id="capNote" role="status"></p>
     </section>
-    <p class="legal">PPB Lic. XN-2024-1183. Prices in KSh and inclusive of VAT. Liquor is not sold to persons under 18, and ID is checked on delivery.</p>
+    <p class="legal">Prices in KSh and inclusive of VAT. Liquor is not sold to persons under 18.</p>
     <p class="credits">Product photos by Open Food Facts contributors (CC BY-SA 3.0) and Wikimedia Commons contributors. See img/credits.json for full attribution.</p>
   </footer>
 </div>
@@ -742,6 +743,7 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
   <h2 id="rxTitle">Prescription information</h2>
   <p>Prescription medicines require a pharmacist’s review. Online prescription submission is not available.</p>
   <p>This website does not collect prescription files or personal details for pharmacist review. No request has been sent.</p>
+  <p>To ask about a prescription, call the branch pharmacy: Syokimau <a href="tel:+254718555554">+254 718 555554</a>, Ruiru <a href="tel:+254142631157">+254 142 631157</a>.</p>
   <button class="btn g" type="button" data-close>Close</button>
 </div></div>
 
@@ -749,7 +751,7 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
   <svg class="ic mic"><use href="#i-clinic"/></svg>
   <h2 id="clinicTitle">Clinic information</h2>
   <p>Online clinic booking is not available. No appointment is reserved and no SMS confirmation is sent through this website.</p>
-  <p>Please confirm services, availability and fees directly with a Xana clinic before visiting.</p>
+  <p>Xana clinics are at the Syokimau and Ruiru branches. Call the branch to confirm services, hours and fees before visiting: Syokimau <a href="tel:+254718666661">+254 718 666661</a>, Ruiru <a href="tel:+254718555559">+254 718 555559</a>.</p>
   <button class="btn g" type="button" data-close>Close</button>
 </div></div>
 
@@ -791,11 +793,6 @@ const CATS = {
 };
 /* the "All" grid deals divisions in turn, so no division buries another; liquor comes last in each turn */
 const GRID_ORDER=['Pharmacy','Retail','Deli','Wholesale','Liquor'];
-/* the pharmacy status line follows Nairobi time (EAT, UTC+3), whatever the visitor's clock says */
-function pharmacyOpen(){
-  const h=new Date(Date.now()+3*3600e3).getUTCHours();
-  return h>=7&&h<23;
-}
 CATS.All=['All'].concat(...DIVS.slice(1).map(d=>CATS[d.id].slice(1)));
 /* price = unit price (or tier-1 price for wholesale) */
 const LEGACY_DEMO_PRODUCTS = [
@@ -923,13 +920,6 @@ function goShop(div,cat){
   state.browsing=true; state.div=div; state.cat=cat||'All'; resetVisible(); renderAll();
   $('#main').scrollIntoView({behavior:adOff()?'auto':'smooth',block:'start'});
   $('#catTitle').focus({preventScroll:true});
-}
-/* Pharmacy and Retail row: only the pharmacy's open/overnight line is dynamic */
-function renderLeads(){ renderRxStatus(); }
-function renderRxStatus(){
-  const open=pharmacyOpen(), el=$('#rxStatus');
-  el.classList.toggle('late',!open);
-  el.querySelector('span').textContent=open?'Pharmacist on duty until 11pm':'Prescriptions are checked again from 7am. The Ruaka Bypass window is open all night.';
 }
 function selectDiv(id){
   window.XanaProductDetail?.browse();
@@ -1443,8 +1433,6 @@ $('#ageNo').onclick=()=>{closeAll();window._pendingDiv=null;window._pendingScrol
   const b=$('#rbAsk'); b.hidden=false;
   b.onclick=()=>window.open('https://wa.me/'+msisdn+'?text='+encodeURIComponent('Hello Xana Pharmacy, I have a question for the pharmacist.'),'_blank','noopener');
 })();
-/* flip the pharmacy badge at 7am and 11pm Nairobi time without a reload */
-setInterval(renderRxStatus,60000);
 /* pharmacy and retail panels */
 $('#rbUpload').onclick=openRx;
 $('#rbShop').onclick=()=>goShop('Pharmacy');
@@ -1476,7 +1464,6 @@ document.querySelectorAll('.fbtn').forEach(b=>b.onclick=()=>{
   goShop(d);
 });
 
-renderLeads();
 renderAll();
 loadCatalogue();
 setInterval(()=>{if(!document.hidden&&catalogueStatus==='ready')loadCatalogue();},60000);

@@ -22,3 +22,10 @@ test('delivery is not quoted or advertised as free in any area', () => {
   assert.match(html, /preference does not confirm delivery coverage/);
   assert.doesNotMatch(html, /Delivering to/);
 });
+
+test('business details shown are only the owner-confirmed ones', () => {
+  assert.doesNotMatch(html, /PPB Lic|XN-2024|until 11pm|7am|open all night|Ruaka Bypass|Kitengela|Industrial Area|three branches/);
+  for (const n of ['+254718666661', '+254718555559', '+254718555554', '+254142631157']) assert.match(html, new RegExp(`tel:\\${n}`));
+  assert.match(html, /Syokimau/);
+  assert.match(html, /close at 9pm/);
+});

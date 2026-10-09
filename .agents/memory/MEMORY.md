@@ -2,3 +2,4 @@
 - [Shared Xana Plus data](shared-xana-data.md) — the website must share the Xana Plus App database rather than use a separate store.
 - [Wholesale business rules](wholesale-business-rules.md) — wholesale can depend on quantity; BC supplies actual thresholds and prices, not a universal six-unit rule.
 - [Static asset freshness](static-asset-freshness.md) — version changed CSS/JS URLs so repeat visitors receive matching storefront assets.
+- [Confirmed business details](business-details.md) — only owner-confirmed branches/contacts/hours go on the site; PPB licence and hours still unconfirmed.
