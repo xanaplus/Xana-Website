@@ -207,6 +207,18 @@ header.app{position:sticky;top:0;z-index:40;background:#fff;border-bottom:1px so
   display:flex;flex-direction:column;position:relative;transition:border-color .18s ease;
 }
 .card:hover{border-color:#BFD3C4}
+.skeleton-card{pointer-events:none}
+.skeleton-block{background:#EDF0ED;animation:skeleton-pulse 1.6s ease-in-out infinite}
+.skeleton-image{aspect-ratio:4/3;border-bottom:1px solid var(--line-2)}
+.skeleton-card .card-body{gap:10px}
+.skeleton-line{height:14px;border-radius:4px}
+.skeleton-brand{width:40%;height:10px}
+.skeleton-name{width:90%}
+.skeleton-pack{width:30%;margin-bottom:16px}
+.skeleton-price{width:45%;height:25px}
+.skeleton-button{height:42px;border-radius:10px;margin-top:12px}
+@keyframes skeleton-pulse{0%,100%{opacity:1}50%{opacity:.45}}
+@media(prefers-reduced-motion:reduce){.skeleton-block{animation:none}}
 .img{aspect-ratio:4/3;position:relative;overflow:hidden;background:#fff;border-bottom:1px solid var(--line-2)}
 .img img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center;padding:14px}
 /* Keep the complete product visible, including older records marked "cover". */
@@ -616,7 +628,7 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
   <main id="main">
     <div class="cat-head">
       <h2 id="catTitle">All products</h2>
-      <span class="count" id="resCount"></span>
+      <span class="count" id="resCount" role="status" aria-live="polite"></span>
       <label class="sort"><span class="sr-only">Sort products</span>
         <select id="sortSel">
           <option value="rec">Recommended</option>
@@ -951,12 +963,23 @@ function filtered(){
 function disc(p){ if(!p.old||p.old<=p.price) return null; return Math.round((1-p.price/p.old)*100); }
 function renderGrid(){
   const g=$('#grid'); const list=filtered();
+  g.setAttribute('aria-busy',String(catalogueStatus==='loading'));
   $('#moreWrap').hidden=true;
   if(catalogueStatus!=='ready'){
     $('#resCount').textContent=catalogueStatus==='loading'?'Loading…':'Unavailable';
     $('#takeover').hidden=true;
     g.innerHTML=catalogueStatus==='loading'
-      ? '<div class="empty" style="grid-column:1/-1"><b>Loading current products…</b></div>'
+      ? Array.from({length:8},()=>`<div class="card skeleton-card" aria-hidden="true">
+          <div class="skeleton-block skeleton-image"></div>
+          <div class="card-body">
+            <div class="skeleton-block skeleton-line skeleton-brand"></div>
+            <div class="skeleton-block skeleton-line skeleton-name"></div>
+            <div class="skeleton-block skeleton-line skeleton-name"></div>
+            <div class="skeleton-block skeleton-line skeleton-pack"></div>
+            <div class="skeleton-block skeleton-line skeleton-price"></div>
+            <div class="skeleton-block skeleton-button"></div>
+          </div>
+        </div>`).join('')
       : '<div class="empty" style="grid-column:1/-1"><b>Live catalogue unavailable</b><span>Prices and stock could not be checked. Please try again.</span><button class="btn w" id="retryCatalogue" type="button">Retry</button></div>';
     if(catalogueStatus==='error') $('#retryCatalogue').onclick=loadCatalogue;
     return;
@@ -1137,8 +1160,11 @@ function openRx(){ closeAll(); openModal('#rxModal'); }
 function openClinic(){ closeAll(); openModal('#clinicModal'); }
 function renderAll(){ renderDivs(); renderChips(); renderGrid(); renderBasketMeta(); renderOfferBar(); }
 async function loadCatalogue(){
-  catalogueStatus='loading';
-  renderGrid();
+  // Keep usable cards visible during the periodic background refresh.
+  if(catalogueStatus!=='ready'){
+    catalogueStatus='loading';
+    renderGrid();
+  }
   try {
     const response=await fetch('/api/catalogue',{cache:'no-store'});
     if(!response.ok) throw new Error('The live catalogue could not be reached');
