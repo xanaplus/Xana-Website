@@ -186,7 +186,9 @@ test('homepage adapter renders skeletons, retryable error, composed empty state 
   const loading = adapter();
   loading.render();
   assert.equal(loading.node('#homeShop').attrs['aria-busy'],'true');
-  assert.equal((loading.node('#homeCategories').innerHTML.match(/aria-hidden="true"/g)||[]).length,5);
+  assert.equal((loading.node('#homeCollections').innerHTML.match(/aria-hidden="true"/g)||[]).length,4);
+  assert.doesNotMatch(html, /id="homeCategories"/);
+  assert.doesNotMatch(source, /data-home-category/);
   const error = adapter('error');
   error.render();
   assert.match(error.node('#homeCollections').innerHTML,/could not check the live catalogue/);

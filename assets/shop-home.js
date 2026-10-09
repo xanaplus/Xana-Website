@@ -31,29 +31,18 @@
     const cart = JSON.stringify(state.cart);
     if (PRODUCTS === previousProducts && catalogueStatus === previousStatus && cart === previousCart) return;
     previousProducts = PRODUCTS; previousStatus = catalogueStatus; previousCart = cart;
-    const categories = document.querySelector('#homeCategories');
     const shelves = document.querySelector('#homeCollections');
     root.setAttribute('aria-busy',String(catalogueStatus === 'loading'));
     if (catalogueStatus === 'loading') {
-      categories.innerHTML = Array.from({length:5},()=>'<div class="home-loading-tile skeleton-block" aria-hidden="true"></div>').join('');
-      shelves.innerHTML = '<p class="sr-only" role="status">Loading shopping categories and current products…</p>';
+      shelves.innerHTML = '<p class="sr-only" role="status">Loading current products…</p><div class="grid">' +
+        Array.from({length:4},()=>'<div class="skeleton-block skeleton-image" aria-hidden="true"></div>').join('') + '</div>';
       return;
     }
     if (catalogueStatus === 'error') {
-      categories.innerHTML = '';
       shelves.innerHTML = '<div class="home-state" role="status"><b>Catalogue unavailable</b><p>We could not check the live catalogue. Please try again.</p><button type="button" class="btn g" data-home-retry>Try again</button></div>';
       shelves.querySelector('[data-home-retry]').onclick = loadCatalogue;
       return;
     }
-    const tiles = helpers.shortcuts(PRODUCTS);
-    categories.innerHTML = tiles.map((tile,index)=>`<button type="button" class="home-category" data-home-category="${index}" aria-label="${escapeHtml(tile.label)}: browse ${escapeHtml(tile.div)}${tile.cat === 'All' ? '' : ', '+escapeHtml(tile.cat)}">
-      <span class="home-category-art"><svg class="ic" aria-hidden="true"><use href="#${tile.icon}"/></svg></span>
-      <span class="home-category-copy"><strong>${escapeHtml(tile.label)}</strong></span>
-    </button>`).join('');
-    categories.querySelectorAll('[data-home-category]').forEach(button => {
-      const tile = tiles[Number(button.dataset.homeCategory)];
-      button.onclick = () => destination(tile.div,tile.cat);
-    });
     shelves.innerHTML = '';
     const collections = helpers.collections(PRODUCTS);
     for (const [shelfIndex,collection] of collections.entries()) {
