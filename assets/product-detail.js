@@ -48,6 +48,7 @@
     const root = document.querySelector('#productDetail');
     if (!root) return;
     document.body.classList.toggle('product-view', selected !== null);
+    scope.XanaHome?.render();
     root.hidden = selected === null;
     if (selected === null) { document.title = originalTitle; return; }
     const p = prod(selected);

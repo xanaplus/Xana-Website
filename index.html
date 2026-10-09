@@ -522,6 +522,7 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
 @media(max-width:700px){.fgrid{grid-template-columns:1fr 1fr}}
 </style>
 <link rel="stylesheet" href="assets/site-motion.css">
+<link rel="stylesheet" href="assets/shop-home.css?v=20261009-2">
 </head>
 <body>
 
@@ -564,7 +565,7 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
 
 <header class="app">
   <div class="hrow">
-    <a class="logo" href="/" data-product-browse aria-label="Xana Life, home">
+    <a class="logo" href="/" data-home-return aria-label="Xana Life, home">
       <img src="img/app/xana-logo.png" alt="Xana Life" width="904" height="712">
     </a>
     <div class="loc">
@@ -598,12 +599,29 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
 
   <h1 class="sr-only">Xana Life pharmacy, retail, deli, liquor and wholesale in Nairobi, with clinic visits at three branches</h1>
 
+  <section class="home-shop" id="homeShop" aria-labelledby="homeTitle">
+    <div class="home-heading">
+      <div>
+        <p class="home-kicker">Xana Life · Every day better</p>
+        <h2 id="homeTitle" tabindex="-1">Your everyday shop.</h2>
+        <p>Groceries for home, pharmacy essentials and bulk buying. Find your department and start your basket.</p>
+      </div>
+      <div class="home-actions">
+        <button type="button" class="btn w" id="homeBrowse">Browse all products <svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></button>
+        <button class="home-clinic-link" id="homeClinic" type="button">Clinic visits</button>
+      </div>
+    </div>
+    <nav class="home-categories" id="homeCategories" aria-label="Shop by department and category"></nav>
+    <div class="home-collections" id="homeCollections"></div>
+  </section>
+
+  <p class="home-services-label">More from Xana Life</p>
   <section class="leads" aria-label="Pharmacy and Retail">
     <article class="lead" id="pharmacy" aria-labelledby="rxH">
       <img class="lead-img" src="img/app/vitamins-supplements.jpg" alt="" width="72" height="72">
       <div class="lead-copy">
         <h2 id="rxH">Pharmacy</h2>
-        <p class="lead-lede">Send a photo of your prescription and a pharmacist checks it within 30 minutes.</p>
+        <p class="lead-lede">Browse pharmacy products or start a prescription review. Prescription medicines require a pharmacist’s approval.</p>
         <p class="lead-status" id="rxStatus"><span></span></p>
       </div>
       <div class="lead-acts">
@@ -615,17 +633,17 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
     <article class="lead" id="retail" aria-labelledby="rtH">
       <img class="lead-img" src="img/app/fresh-produce.jpg" alt="" width="72" height="72">
       <div class="lead-copy">
-        <h2 id="rtH">Retail</h2>
-        <p class="lead-lede">Fresh produce, staples and household shopping. Order before 9pm and it arrives in about 45 minutes.</p>
+        <h2 id="rtH">Groceries &amp; household</h2>
+        <p class="lead-lede">Explore everyday groceries and household products at current catalogue prices.</p>
       </div>
       <div class="lead-acts">
         <button class="btn g" id="rtShop" type="button">Shop retail</button>
-        <button class="tlink" id="rtDeals" type="button">This week's offers</button>
+        <button class="tlink" id="rtDeals" type="button">Browse all products</button>
       </div>
     </article>
   </section>
 
-  <section class="offers" id="offerCarousel" hidden role="region" aria-roledescription="carousel" aria-label="Offers"></section>
+  <section class="offers" id="offerCarousel" hidden role="region" aria-roledescription="carousel" aria-label="Xana services and departments"></section>
 
   <main id="main">
     <section id="productDetail" hidden aria-label="Product details"></section>
@@ -654,7 +672,7 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
       <h3 id="bulkH">Buying for a shop, school or event?</h3>
       <p id="bulkPricingNote">Bales and cartons at current unit prices. Quantity discounts will appear when verified prices are available from the shared catalogue. Collect from the wholesale lane at Industrial Area.</p>
     </div>
-    <button class="btn g" id="bulkBtn" type="button">See wholesale prices <svg class="ic"><use href="#i-arrow-right"/></svg></button>
+    <button class="btn g" id="bulkBtn" type="button">Browse wholesale <svg class="ic"><use href="#i-arrow-right"/></svg></button>
   </section>
 
   <footer>
@@ -737,9 +755,9 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
   <div class="dbody" id="catsBody"></div>
 </section>
 
-<div class="modal" id="ageModal"><div class="mbox">
+<div class="modal" id="ageModal" role="dialog" aria-modal="true" aria-labelledby="ageTitle"><div class="mbox">
   <svg class="ic mic"><use href="#i-age"/></svg>
-  <h2>Are you 18 or older?</h2>
+  <h2 id="ageTitle">Are you 18 or older?</h2>
   <p>You are opening <b>Liquor</b>: wine, spirits and beer. Not for sale to persons under 18. ID is checked on delivery.</p>
   <div class="row2">
     <button class="btn w" id="ageNo" type="button">No, go back</button>
@@ -750,7 +768,7 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
 <div class="modal" id="rxModal"><div class="mbox">
   <svg class="ic mic"><use href="#i-rx"/></svg>
   <h2>Upload a prescription</h2>
-  <p>Photograph the prescription and a PPB licensed pharmacist will confirm within 30 minutes, 7am to 11pm.</p>
+  <p>Prescription medicines require a pharmacist’s review. This demo does not send or save your prescription.</p>
   <div class="field"><label for="rxName">Full name</label><input id="rxName" placeholder="e.g. Wanjiku Mwangi"></div>
   <div class="field"><label for="rxPhone">Phone, for M-PESA</label><input id="rxPhone" placeholder="07..."></div>
   <div class="field"><label for="rxFile">Prescription file</label><input type="file" id="rxFile" accept="image/*,.pdf"></div>
@@ -780,10 +798,12 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
 
 
 <script src="assets/catalogue-rules.js"></script>
+<script src="assets/home-catalogue.js"></script>
 <script src="assets/basket-storage.js"></script>
 <script src="/assets/product-images.js"></script>
-<script src="/assets/product-detail.js"></script>
+<script src="/assets/product-detail.js?v=20261009-home">
 <script src="assets/site-motion.js"></script>
+<script src="assets/shop-home.js?v=20261009-2"></script>
 <script>
 
 /* the five divisions, in the app's order. Pharmacy and Retail lead as panels;
@@ -932,9 +952,11 @@ const catCount=(div,cat)=>PRODUCTS.filter(p=>inDivision(p,div)&&inCategory(p,div
 /* jump to the product grid with a division (and optionally a category) applied */
 function goShop(div,cat){
   window.XanaProductDetail?.browse();
-  if(div==='Liquor'&&!state.age){ window._pendingDiv=div; window._pendingCat=cat||'All'; window._pendingScroll=true; openModal('#ageModal'); return; }
+  if(div==='Liquor'&&!state.age){ window._pendingDiv=div; window._pendingCat=cat||'All'; window._pendingScroll=true; window.XanaHome?.rememberAgeFocus(); openModal('#ageModal'); $('#ageNo').focus(); return; }
+  window.XanaHome?.resetFilters();
   state.div=div; state.cat=cat||'All'; resetVisible(); renderAll();
   $('#main').scrollIntoView({behavior:adOff()?'auto':'smooth',block:'start'});
+  $('#catTitle').focus({preventScroll:true});
 }
 /* Pharmacy and Retail row: only the pharmacy's open/overnight line is dynamic */
 function renderLeads(){ renderRxStatus(); }
@@ -975,6 +997,7 @@ function filtered(){
 }
 function disc(p){ if(!p.old||p.old<=p.price) return null; return Math.round((1-p.price/p.old)*100); }
 function renderGrid(){
+  if(typeof window!=='undefined')window.XanaHome?.render();
   const g=$('#grid'); const list=filtered();
   g.setAttribute('aria-busy',String(catalogueStatus==='loading'));
   $('#moreWrap').hidden=true;
@@ -1024,10 +1047,14 @@ function renderGrid(){
   renderTakeover();
   if(!ordered.length){ g.innerHTML=`<div class="empty" style="grid-column:1/-1"><svg class="ic ic-lg"><use href="#i-search"/></svg><b>No products found</b><span>Try a different search, or clear the filters.</span></div>`; return; }
   g.innerHTML='';
-  ordered.slice(0,shown).forEach((p,index)=>{
+  ordered.slice(0,shown).forEach((p,index)=>g.appendChild(createProductCard(p,index,!!(spon&&p.id===spon.id))));
+  $('#moreWrap').hidden=ordered.length<=shown;
+  if(typeof window!=='undefined'&&window.XanaMotion) window.XanaMotion.registerGrid(g);
+}
+/* Same card, product links and guarded purchase actions on every shop shelf. */
+function createProductCard(p,index=0,isSpon=false,division=state.div){
     const q=state.cart[p.id]||0;
     const d=disc(p);
-    const isSpon = !!(spon&&p.id===spon.id);
     const card=document.createElement('div'); card.className='card';
     card.dataset.motionProduct=String(p.id);
     let tierHtml='';
@@ -1045,7 +1072,7 @@ function renderGrid(){
         ${p.stock<=0?`<span class="oos">Out of stock</span>`:''}
       </a>
       <div class="card-body">
-        <div class="brandrow"><span>${escapeHtml(productCategory(p,state.div))}</span><span>${escapeHtml(p.tiers&&activeTier(p,q)>0?p.div+' · Wholesale price':p.div)}</span></div>
+        <div class="brandrow"><span>${escapeHtml(productCategory(p,division))}</span><span>${escapeHtml(p.tiers&&activeTier(p,q)>0?p.div+' · Wholesale price':p.div)}</span></div>
         <a class="pname" data-product-link href="${escapeHtml(window.XanaProductDetail.href(p.id))}" style="color:inherit;text-decoration:none">${escapeHtml(p.name)}</a>
         <div class="pack">${escapeHtml(p.pack)}</div>
         <div class="pricerow"><span class="price"><small>KSh</small> ${priceNow.toLocaleString('en-KE')}</span>${p.old&&!p.tiers?`<span class="old">${ksh(p.old)}</span>`:''}</div>
@@ -1063,10 +1090,7 @@ function renderGrid(){
       dec.onclick=()=>add(p.id,-1); inc.onclick=()=>add(p.id,1);
       act.appendChild(s);
     }
-    g.appendChild(card);
-  });
-  $('#moreWrap').hidden=ordered.length<=shown;
-  if(typeof window!=='undefined'&&window.XanaMotion) window.XanaMotion.registerGrid(g);
+    return card;
   function id2(p){return p.id;}
 }
 function renderCatsDrawer(){
@@ -1300,7 +1324,7 @@ const adDelay=a=>a&&a.duration?a.duration:3000;
 const adOff=()=>{try{return matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){return false;}};
 /* slides advance every 3 seconds; they pause on hover, keyboard focus, a hidden tab, when scrolled out of view, and never move for reduce-motion */
 const AD_AUTOPLAY=true;
-function adPaused(){ return !AD_AUTOPLAY || adUserPaused || adHover || adFocus || document.hidden || !adInView || adOff(); }
+function adPaused(){ return !AD_AUTOPLAY || adUserPaused || adHover || adFocus || document.hidden || !adInView || adOff() || (typeof XanaHomeCatalogue!=='undefined'&&!XanaHomeCatalogue.isHome(state, new URL(location.href).searchParams.get('product'))); }
 function adStop(){ clearTimeout(adTimer); adTimer=null; const p=$('#offerProg'); if(p) p.classList.remove('run'); }
 function adTick(){
   clearTimeout(adTimer); adTimer=null;
@@ -1326,7 +1350,7 @@ function adGoTo(i){
     slide.setAttribute('aria-hidden',k===adIndex?'false':'true');
   });
   const car=$('#offerCarousel');
-  if(car) car.setAttribute('aria-label','Offers, slide '+(adIndex+1)+' of '+n);
+  if(car) car.setAttribute('aria-label','Xana services and departments, slide '+(adIndex+1)+' of '+n);
   renderOfferBar();
 }
 function adAct(a){
@@ -1408,7 +1432,7 @@ function renderAdCarousel(){
 function renderOfferBar(){
   const el=$('#offerBar'), ads=PROMOS.ads, a=ads.length?adAt(adIndex):null, p=a&&a.sku?prod(a.sku):null;
   /* the phone bar mirrors the banner's current slide and is always on, like the banner */
-  if(!a){
+  if(!a||!XanaHomeCatalogue.isHome(state,new URL(location.href).searchParams.get('product'))){
     el.classList.remove('show'); document.body.classList.remove('has-offerbar'); return;
   }
   const txt=p?fillPromo(a.text,p):a.text;
@@ -1425,7 +1449,7 @@ function renderTakeover(){
   const t=PROMOS.takeover[state.cat]||PROMOS.takeover[state.div];
   const p=t&&prod(t.sku);
   if(p&&!adAllowed(p)){ el.hidden=true; el.innerHTML=''; return; }
-  if(!t||!p||state.q!==''||wasDismissed('takeover.'+t.id)){ el.hidden=true; el.innerHTML=''; return; }
+  if(!t||!p||!XanaHomeCatalogue.isHome(state)||wasDismissed('takeover.'+t.id)){ el.hidden=true; el.innerHTML=''; return; }
   el.hidden=false;
   el.innerHTML=`<svg class="ic"><use href="#i-tag"/></svg><span><b>${t.brand}</b> · ${fillPromo(t.text,p)}</span>
     <button class="ob-cta" type="button" id="tkCta">${t.cta} · ${ksh(p.price)}</button>`;
@@ -1460,7 +1484,7 @@ if('IntersectionObserver' in window && $('#offerCarousel')){
   new IntersectionObserver(es=>{ adInView=es[0].isIntersecting; adTick(); },{threshold:.25}).observe($('#offerCarousel'));
 }
 /* EVENTS */
-$('#search').addEventListener('input',e=>{window.XanaProductDetail?.browse();state.q=e.target.value.trim();resetVisible();renderGrid();});
+$('#search').addEventListener('input',e=>{window.XanaProductDetail?.browse();state.q=e.target.value.trim();resetVisible();renderGrid();renderOfferBar();adTick();});
 $('#searchBtn').onclick=()=>{window.XanaProductDetail?.browse();$('#main').scrollIntoView({behavior:adOff()?'auto':'smooth',block:'start'});};
 $('#openBasket').onclick=()=>openDrawer('#basketDrawer');
 $('#closeBasket').onclick=closeAll;
@@ -1470,11 +1494,11 @@ document.querySelectorAll('[data-close]').forEach(b=>b.onclick=closeAll);
 $('#ageYes').onclick=()=>{
   const pendingDiv=window._pendingDiv,pendingCat=window._pendingCat,pendingScroll=window._pendingScroll,pendingAdd=window._pendingAdd,pendingQty=window._pendingAddQty||1;
   state.age=true;closeAll();
-  if(pendingDiv){state.div=pendingDiv;state.cat=pendingCat||'All';resetVisible();renderAll();}
-  if(pendingScroll){$('#grid').scrollIntoView({behavior:adOff()?'auto':'smooth',block:'start'});}
+  if(pendingDiv){window.XanaHome?.resetFilters();state.div=pendingDiv;state.cat=pendingCat||'All';resetVisible();renderAll();}
+  if(pendingScroll){$('#main').scrollIntoView({behavior:adOff()?'auto':'smooth',block:'start'});$('#catTitle').focus?.({preventScroll:true});}
   if(pendingAdd)add(pendingAdd,pendingQty);
 };
-$('#ageNo').onclick=()=>{closeAll();window._pendingDiv=null;window._pendingScroll=false;window._pendingAdd=null;window._pendingAddQty=null;};
+$('#ageNo').onclick=()=>{closeAll();window._pendingDiv=null;window._pendingScroll=false;window._pendingAdd=null;window._pendingAddQty=null;window.XanaHome?.restoreAgeFocus();};
 /* "Ask a pharmacist" stays hidden until PROMOS.pharmacist.whatsapp holds a number */
 (function(){
   const raw=(PROMOS.pharmacist.whatsapp||'').replace(/[^\d+]/g,'');
@@ -1491,7 +1515,7 @@ $('#rbShop').onclick=()=>goShop('Pharmacy');
 $('#rtShop').onclick=()=>goShop('Retail');
 $('#rxSubmit').onclick=()=>{
   if(!$('#rxName').value.trim()||!$('#rxPhone').value.trim()){toast('Enter your name and phone number');return;}
-  $('#rxDone').innerHTML='<div class="ordersuccess"><svg class="ic"><use href="#i-check"/></svg><span><b>Prescription received</b><br>A pharmacist will WhatsApp you within 30 minutes.</span></div>'; setTimeout(closeAll,1400);
+  $('#rxDone').innerHTML='<div class="ordersuccess"><svg class="ic"><use href="#i-check"/></svg><span><b>Demo complete</b><br>No prescription has been sent or saved.</span></div>'; setTimeout(closeAll,1400);
 };
 $('#clSubmit').onclick=()=>{
   if(!$('#clPhone').value.trim()){toast('Enter your phone number');return;}
@@ -1507,17 +1531,17 @@ document.querySelectorAll('#bottomNav .navbtn').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('#bottomNav .navbtn').forEach(x=>x.classList.remove('active')); b.classList.add('active');
   const n=b.dataset.nav;
   if(['shop','cats','pharmacy'].includes(n))window.XanaProductDetail?.browse();
-  if(n==='shop'){closeAll();window.scrollTo({top:0,behavior:adOff()?'auto':'smooth'});}
+  if(n==='shop'){closeAll();window.XanaHome.home();}
   if(n==='cats')openDrawer('#catsDrawer');
-  if(n==='pharmacy'){closeAll();$('#pharmacy').scrollIntoView({behavior:adOff()?'auto':'smooth',block:'start'});}
+  if(n==='pharmacy'){closeAll();goShop('Pharmacy');}
   if(n==='orders')openDrawer('#ordersDrawer');
   if(n==='basket')openDrawer('#basketDrawer');
 });
 $('#clDate').valueAsDate=new Date();
 /* header shortcuts + footer division links */
-$('#rtDeals').onclick=()=>goShop('Retail','On offer');
+$('#rtDeals').onclick=()=>goShop('All');
 $('#bulkBtn').onclick=()=>goShop('Wholesale');
-$('#sortSel').onchange=e=>{state.sort=e.target.value;resetVisible();renderGrid();};
+$('#sortSel').onchange=e=>{state.sort=e.target.value;resetVisible();renderGrid();renderOfferBar();adTick();};
 $('#moreBtn').onclick=()=>{shown+=48;renderGrid();};
 $('#navRx').onclick=openRx;
 $('#navClinics').onclick=openClinic;
