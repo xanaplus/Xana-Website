@@ -1111,7 +1111,7 @@ function renderOrders(){
 /* MODALS / DRAWERS */
 function openDrawer(s){ closeAll(true); $(s).classList.add('show'); $('#scrim').classList.add('show'); if(s==='#basketDrawer')renderBasket(); if(s==='#ordersDrawer')renderOrders(); if(s==='#catsDrawer')renderCatsDrawer(); }
 function openModal(s){ $('#scrim').classList.add('show'); $(s).classList.add('show'); }
-function closeAll(keepScrim){ document.querySelectorAll('.drawer,.modal').forEach(e=>e.classList.remove('show')); if(!keepScrim)$('#scrim').classList.remove('show'); }
+ function closeAll(keepScrim){ document.querySelectorAll('.drawer,.modal').forEach(e=>e.classList.remove('show')); if(keepScrim!==true)$('#scrim').classList.remove('show'); }
 function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),1600); }
 function openRx(){ closeAll(); openModal('#rxModal'); }
 function openClinic(){ closeAll(); openModal('#clinicModal'); }
