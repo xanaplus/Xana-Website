@@ -1,0 +1,16 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "gOL02ov3IqQb6JqVIS4gQ"
+uri = "file://docs/reviews/catalogue-classification-review.csv"
+type = "table"
+title = "13 catalogue items requiring classification review"
+description = "Current BC fields and safety flags, with blank approval columns for pharmacist and BC administrator review. No changes have been applied."
+logical_id = "9281372e-41dc-42d6-b84a-19cb5d78cfe3"
+content_hash = "sha256:84ab4cd0c9f79a72dd735c28a3e3bd0edcea0f1415a549b3a8f3054135244d69"
+size = 2257
+mtime_ms = 1791557717647
+storage_uri = "gcs://replit-rams-assets-reed/rams/assets/repl:4c99c35a-b70a-4de4-bfe3-63ca1fcb5ba0/9281372e-41dc-42d6-b84a-19cb5d78cfe3/3e08bdf4-7690-4e83-91e5-8899475e5a33"
+storage_version_token = "1791557718180801"
+content_type = "text/csv"
