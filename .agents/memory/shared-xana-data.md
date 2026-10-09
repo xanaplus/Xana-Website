@@ -14,3 +14,9 @@ The user states: “bc is the source of truth.”
 **Why:** The user explicitly confirmed BC's authority when asked about conflicting catalogue classifications.
 
 **How to apply:** Treat BC as authoritative for shared catalogue data. Do not resolve conflicting BC fields by guessing from product names or adding independent website overrides. Corrections require authoritative BC changes before verifying the synced app and website results.
+
+Some BC item classifications are off; the user will fix them later.
+
+**Why:** The user asked to remember this and defer corrections.
+
+**How to apply:** Leave these classifications unchanged. BC remains the source of truth; do not resume correction work unless the user requests it.
