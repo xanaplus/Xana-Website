@@ -4,14 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Xana Life · Pharmacy, Retail, Deli, Liquor and Wholesale in Nairobi</title>
-<meta name="description" content="Xana Life shops and pharmacy across Nairobi, Kiambu and Kajiado. Medicines and prescriptions, groceries, deli, liquor, bulk wholesale and clinic visits. Free delivery in Nairobi over KSh 2,500.">
+<meta name="description" content="Browse Xana Life pharmacy, groceries, deli, liquor and wholesale products. Online checkout, prescription submission and clinic booking are not available.">
 <meta name="theme-color" content="#046938">
 <link rel="icon" href="img/app/xana-logo.png">
 <link rel="apple-touch-icon" href="img/app/xana-logo.png">
 <link rel="stylesheet" href="/assets/product-detail.css?v=20261009-3">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Xana Life · Every Day Better">
-<meta property="og:description" content="Pharmacy first, plus retail, deli, liquor, wholesale and clinics. One basket, delivered across Nairobi.">
+<meta property="og:description" content="Browse Xana Life products and service information. Online ordering is not available yet.">
 <meta property="og:image" content="img/app/cheese-counter.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <style>
@@ -552,7 +552,7 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
 <symbol id="i-chat" viewBox="0 0 256 256"><path d="M128,24A104,104,0,0,0,36.18,176.88L24.83,210.93a16,16,0,0,0,20.24,20.24l34.05-11.35A104,104,0,1,0,128,24Zm0,192a87.87,87.87,0,0,1-44.06-11.81,8,8,0,0,0-6.54-.67L40,216,52.47,178.6a8,8,0,0,0-.66-6.54A88,88,0,1,1,128,216Z"/></symbol>
 <symbol id="i-arc" viewBox="0 0 240 120"><path d="M12 113C46 24 140 0 233 29C150 16 72 40 34 99Z"/></symbol></svg>
 
-<div class="topbar"><svg class="ic"><use href="#i-truck"/></svg> Free delivery in Nairobi over <b>KSh 2,500</b><span class="tb-more"> &nbsp;·&nbsp; Wholesale pickup at Industrial Area</span></div>
+<div class="topbar">Browse products · Online ordering is not available yet</div>
 
 <header class="app">
   <div class="hrow">
@@ -561,7 +561,7 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
     </a>
     <div class="loc">
       <svg class="ic"><use href="#i-pin"/></svg>
-      <span class="loc-txt">Delivering to<b id="locName">Nairobi</b><button type="button" id="locChange">Change area</button></span>
+      <span class="loc-txt">Selected area<b id="locName">Nairobi</b><button type="button" id="locChange">Change area</button></span>
     </div>
     <div class="searchbox" role="search">
       <svg class="ic"><use href="#i-search"/></svg>
@@ -578,8 +578,8 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
     <div class="tabs-in">
       <div class="divtabs" id="divs"></div>
       <div class="tablinks">
-        <button type="button" id="navRx">Upload prescription</button>
-        <button type="button" id="navClinics">Book a clinic visit</button>
+        <button type="button" id="navRx">Prescription information</button>
+        <button type="button" id="navClinics">Clinic information</button>
         <button type="button" id="navOrders">My orders</button>
       </div>
     </div>
@@ -614,7 +614,7 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
         <p class="lead-status" id="rxStatus"><span></span></p>
       </div>
       <div class="lead-acts">
-        <button class="btn g" id="rbUpload" type="button"><svg class="ic"><use href="#i-rx"/></svg> Upload prescription</button>
+        <button class="btn g" id="rbUpload" type="button"><svg class="ic"><use href="#i-rx"/></svg> Prescription information</button>
         <button class="tlink" id="rbShop" type="button">Shop pharmacy</button>
         <button class="tlink" id="rbAsk" type="button" hidden>Ask a pharmacist</button>
       </div>
@@ -737,32 +737,26 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
   </div>
 </div></div>
 
-<div class="modal" id="rxModal"><div class="mbox">
+<div class="modal" id="rxModal" role="dialog" aria-modal="true" aria-labelledby="rxTitle"><div class="mbox">
   <svg class="ic mic"><use href="#i-rx"/></svg>
-  <h2>Upload a prescription</h2>
-  <p>Prescription medicines require a pharmacist’s review. This demo does not send or save your prescription.</p>
-  <div class="field"><label for="rxName">Full name</label><input id="rxName" placeholder="e.g. Wanjiku Mwangi"></div>
-  <div class="field"><label for="rxPhone">Phone, for M-PESA</label><input id="rxPhone" placeholder="07..."></div>
-  <div class="field"><label for="rxFile">Prescription file</label><input type="file" id="rxFile" accept="image/*,.pdf"></div>
-  <div class="row2"><button class="btn w" type="button" data-close>Cancel</button><button class="btn g" id="rxSubmit" type="button">Submit</button></div>
-  <div id="rxDone"></div>
+  <h2 id="rxTitle">Prescription information</h2>
+  <p>Prescription medicines require a pharmacist’s review. Online prescription submission is not available.</p>
+  <p>This website does not collect prescription files or personal details for pharmacist review. No request has been sent.</p>
+  <button class="btn g" type="button" data-close>Close</button>
 </div></div>
 
-<div class="modal" id="clinicModal"><div class="mbox">
+<div class="modal" id="clinicModal" role="dialog" aria-modal="true" aria-labelledby="clinicTitle"><div class="mbox">
   <svg class="ic mic"><use href="#i-clinic"/></svg>
-  <h2>Book a clinic visit</h2>
-  <p>GP, child health, diabetes and hypertension care, lab tests and vaccinations. Ruaka · Kilimani · Kitengela Road.</p>
-  <div class="field"><label for="clSel">Clinic</label><select id="clSel"><option>Ruaka, GP and lab</option><option>Kilimani, GP and mother and baby</option><option>Kitengela Road, diabetes and hypertension</option></select></div>
-  <div class="field"><label for="clDate">Day</label><input type="date" id="clDate"></div>
-  <div class="field"><label for="clPhone">Phone</label><input id="clPhone" placeholder="07..."></div>
-  <div class="row2"><button class="btn w" type="button" data-close>Cancel</button><button class="btn g" id="clSubmit" type="button">Book visit, KSh 800</button></div>
-  <div id="clDone"></div>
+  <h2 id="clinicTitle">Clinic information</h2>
+  <p>Online clinic booking is not available. No appointment is reserved and no SMS confirmation is sent through this website.</p>
+  <p>Please confirm services, availability and fees directly with a Xana clinic before visiting.</p>
+  <button class="btn g" type="button" data-close>Close</button>
 </div></div>
 
 <div class="modal" id="locModal"><div class="mbox">
   <svg class="ic mic"><use href="#i-pin"/></svg>
-  <h2>Delivery area</h2>
-  <p>We deliver across Nairobi, Kiambu and Kajiado. Choose the area closest to you.</p>
+  <h2>Select an area</h2>
+  <p>This preference does not confirm delivery coverage, availability or fees. Online ordering is not available.</p>
   <div id="locList" style="display:grid;gap:8px;margin-top:14px"></div>
 </div></div>
 
@@ -773,7 +767,7 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
 <script src="assets/home-catalogue.js?v=20261009-3"></script>
 <script src="assets/basket-storage.js"></script>
 <script src="/assets/product-images.js"></script>
-<script src="/assets/product-detail.js?v=20261009-3"></script>
+<script src="/assets/product-detail.js?v=20261009-service-info"></script>
 <script src="assets/site-motion.js"></script>
 <script src="assets/shop-home.js?v=20261009-4"></script>
 <script>
@@ -1057,7 +1051,7 @@ function createProductCard(p,index=0,isSpon=false,division=state.div){
       </div>`;
     const act=card.querySelector('.action');
     if(p.stock<=0){ act.innerHTML=`<button class="addbtn" disabled>Out of stock</button>`; }
-    else if(p.rx && !q){ const b=document.createElement('button'); b.className='addbtn rx'; b.innerHTML='<svg class="ic"><use href="#i-rx"/></svg> Upload prescription'; b.onclick=openRx; act.appendChild(b); }
+    else if(p.rx && !q){ const b=document.createElement('button'); b.className='addbtn rx'; b.innerHTML='<svg class="ic"><use href="#i-rx"/></svg> Prescription information'; b.onclick=openRx; act.appendChild(b); }
     else if(!q){ const b=document.createElement('button'); b.className='addbtn'; b.innerHTML='<svg class="ic"><use href="#i-plus"/></svg> Add to basket'; b.onclick=()=>add(id2(p),1); act.appendChild(b); }
     else{
       const s=document.createElement('div'); s.className='stepper';
@@ -1130,41 +1124,29 @@ function renderBasket(){
     m.querySelectorAll('button')[1].onclick=()=>add(id,1);
     r.appendChild(m); body.appendChild(r);
   });
-  const sub=cartTotal(), del=sub>=2500||sub===0?0:250, tot=sub+del;
-  /* slot 10: free-delivery progress, plus one top-up suggestion chosen from real stock */
+  const sub=cartTotal();
   const sug=topUpSuggestion();
-  const pct=Math.min(100,Math.round(sub/2500*100));
-  foot.innerHTML=`<div class="ship${sub>=2500?' done':''}">
-     <div class="ship-line"><span>${sub>=2500?'Free delivery unlocked':ksh(2500-sub)+' to free delivery'}</span><b>${ksh(sub)} / ${ksh(2500)}</b></div>
-     <div class="ship-track"><i style="width:${pct}%"></i></div>
-   </div>
+  foot.innerHTML=`
    ${sug?`<div class="xrow">
      <div class="bi">${sug.p.img?productImageMarkup(sug.p,{thumbnail:true,eager:true}):`<span class="mono"><svg class="ic"><use href="#i-package"/></svg></span>`}</div>
      <div class="bn">${escapeHtml(sug.p.name)}<small>${sug.reason} · ${ksh(sug.p.price)}</small></div>
      <button class="xadd" type="button" data-x="${escapeHtml(sug.p.id)}">Add</button>
    </div>`:''}
    <div class="totrow" style="margin-top:10px"><span>Subtotal</span><b>${ksh(sub)}</b></div>
-   <div class="totrow"><span>Delivery (${state.area})</span><b>${del===0?'FREE':ksh(del)}</b></div>
-   <div class="totrow grand"><span>Total</span><span>${ksh(tot)}</span></div>
+   <div class="totrow"><span>Delivery</span><b>Not quoted</b></div>
+   <p class="foot-note">The subtotal covers products only. Delivery coverage, fees and a final order total are not confirmed.</p>
    <button class="checkout" id="coBtn" type="button" disabled aria-describedby="checkoutNotice">Checkout unavailable · Demo</button>
    <p class="foot-note" id="checkoutNotice">Browsing demo only. No order will be placed, no M-PESA prompt will be sent, and no payment will be taken.</p>
    <p class="foot-note">Liquor is not sold to under-18s. ID is checked on delivery.</p>`;
   const xb=foot.querySelector('.xadd');
   if(xb) xb.onclick=()=>add(xb.dataset.x,1);
 }
-/* cheapest real product that moves the basket along: clears the delivery threshold, else
-   the cheapest of the division already in the basket */
+/* Suggest an available unrestricted product, without delivery incentives. */
 function topUpSuggestion(){
   const inCart=new Set(Object.keys(state.cart));
-  const pool=PRODUCTS.filter(p=>!inCart.has(p.id)&&p.stock>0&&(!p.age||state.age));
+  const pool=PRODUCTS.filter(p=>!inCart.has(p.id)&&p.stock>0&&!p.rx&&(!p.age||state.age));
   if(!pool.length) return null;
   const byPrice=(a,b)=>a.price-b.price;
-  const gap=2500-cartTotal();
-  if(gap>0){
-    const clears=pool.filter(p=>p.price>=gap).sort(byPrice);
-    if(clears.length) return {p:clears[0],reason:'Reaches free delivery'};
-    return {p:pool.slice().sort(byPrice)[0],reason:'Cheapest top up'};
-  }
   const counts={};
   Object.keys(state.cart).forEach(id=>{const d=prod(id).div;counts[d]=(counts[d]||0)+1;});
   const top=Object.keys(counts).sort((a,b)=>counts[b]-counts[a])[0]||state.div;
@@ -1243,7 +1225,7 @@ const PROMOS = {
      Omit sku for a service ad and set action to 'clinic' or 'rx'. */
   ads:[
     {id:'clinic-visit',label:'Clinics',brand:'Xana Clinics',tone:'ink',action:'clinic',
-     text:'GP visits, lab tests and jabs',sub:'Walk in at Ruaka, Kilimani or Kitengela Road. Open 8am to 8pm.',cta:'Book a visit · KSh 800'},
+     text:'Xana clinic information',sub:'Online booking is not available. Confirm services, availability and fees with the clinic before visiting.',cta:'Clinic information'},
     {id:'browse-pharmacy',label:'Pharmacy',brand:'Xana Pharmacy',tone:'green',action:'shop',division:'Pharmacy',icon:'i-package',
      text:'Explore your pharmacy essentials',sub:'Browse the pharmacy catalogue. Prescription requirements remain shown on each product.',cta:'Browse pharmacy'},
     {id:'browse-retail',label:'Retail',brand:'Xana Retail',tone:'gold',action:'shop',division:'Retail',icon:'i-package',
@@ -1466,19 +1448,11 @@ setInterval(renderRxStatus,60000);
 /* pharmacy and retail panels */
 $('#rbUpload').onclick=openRx;
 $('#rbShop').onclick=()=>goShop('Pharmacy');
-$('#rxSubmit').onclick=()=>{
-  if(!$('#rxName').value.trim()||!$('#rxPhone').value.trim()){toast('Enter your name and phone number');return;}
-  $('#rxDone').innerHTML='<div class="ordersuccess"><svg class="ic"><use href="#i-check"/></svg><span><b>Demo complete</b><br>No prescription has been sent or saved.</span></div>'; setTimeout(closeAll,1400);
-};
-$('#clSubmit').onclick=()=>{
-  if(!$('#clPhone').value.trim()){toast('Enter your phone number');return;}
-  $('#clDone').innerHTML='<div class="ordersuccess"><svg class="ic"><use href="#i-check"/></svg><span><b>Visit booked</b><br>'+$('#clSel').value+' · SMS confirmation sent. KSh 800 payable at the clinic.</span></div>'; setTimeout(closeAll,1600);
-};
 $('#locChange').onclick=()=>{ renderLoc(); openModal('#locModal'); };
 function renderLoc(){
   const areas=['Nairobi · Ruaka','Nairobi · Kilimani','Nairobi · Westlands','Nairobi · Embakasi','Nairobi · Karen','Kiambu · Thika Rd'];
   $('#locList').innerHTML=areas.map(a=>`<button class="btn ${a.includes(state.area)?'g':'w'}" data-a="${a}">${a}</button>`).join('');
-  $('#locList').querySelectorAll('button').forEach(b=>b.onclick=()=>{state.area=b.dataset.a.split('·')[1].trim();$('#locName').textContent='Delivering to '+state.area;closeAll();toast('Delivering to '+state.area);});
+  $('#locList').querySelectorAll('button').forEach(b=>b.onclick=()=>{state.area=b.dataset.a.split('·')[1].trim();$('#locName').textContent=state.area;closeAll();toast('Selected area: '+state.area);});
 }
 document.querySelectorAll('#bottomNav .navbtn').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('#bottomNav .navbtn').forEach(x=>x.classList.remove('active')); b.classList.add('active');
@@ -1490,7 +1464,6 @@ document.querySelectorAll('#bottomNav .navbtn').forEach(b=>b.onclick=()=>{
   if(n==='orders')openDrawer('#ordersDrawer');
   if(n==='basket')openDrawer('#basketDrawer');
 });
-$('#clDate').valueAsDate=new Date();
 /* header shortcuts + footer division links */
 $('#bulkBtn').onclick=()=>goShop('Wholesale');
 $('#sortSel').onchange=e=>{state.sort=e.target.value;resetVisible();renderGrid();adTick();};
