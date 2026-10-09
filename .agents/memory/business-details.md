@@ -10,3 +10,5 @@ Still unconfirmed: PPB licence number, opening time, clinic hours, pharmacist du
 **Why:** Earlier hardcoded details (PPB number, Nairobi branches, 7am–11pm, overnight window) were invented placeholders and have been removed.
 
 **How to apply:** Never publish a licence number, hours or contact the owner has not confirmed. Keep "Ask a pharmacist" WhatsApp hidden until a WhatsApp number is confirmed.
+
+Owner decisions (Oct 2026): header picker is a branch choice (Syokimau, Ruiru) with no default until the shopper picks; liquor copy says "ID is checked at purchase". Delivery is not confirmed, so don't write copy that assumes it.

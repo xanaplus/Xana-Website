@@ -91,7 +91,7 @@ header.app{position:sticky;top:0;z-index:40;background:#fff;border-bottom:1px so
 .loc{display:flex;align-items:center;gap:8px;color:var(--muted);min-width:0;flex:0 0 auto;padding-left:20px;border-left:1px solid var(--line)}
 .loc .ic{color:var(--ink-2);font-size:17px}
 .loc-txt{font-size:12px;line-height:1.25;white-space:nowrap}
-.loc-txt b{display:block;font-size:13.5px;color:var(--ink);font-weight:600}
+.loc-txt .loc-name{display:block;background:none;border:0;padding:0;font:inherit;font-size:13.5px;color:var(--ink);font-weight:600;cursor:pointer;text-align:left}
 .loc-txt button{background:none;border:0;padding:0;cursor:pointer;color:var(--green);font-size:12px;font-weight:600;text-decoration:underline;text-underline-offset:2px}
 .searchbox{
   flex:1;min-width:0;display:flex;align-items:center;gap:10px;background:#F6F7F5;border:1px solid var(--line);
@@ -561,7 +561,7 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
     </a>
     <div class="loc">
       <svg class="ic"><use href="#i-pin"/></svg>
-      <span class="loc-txt">Selected area<b id="locName">Nairobi</b><button type="button" id="locChange">Change area</button></span>
+      <span class="loc-txt">Branch<button type="button" class="loc-name" id="locName" aria-label="Choose a branch">Not chosen</button><button type="button" id="locChange">Choose branch</button></span>
     </div>
     <div class="searchbox" role="search">
       <svg class="ic"><use href="#i-search"/></svg>
@@ -731,7 +731,7 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
 <div class="modal" id="ageModal" role="dialog" aria-modal="true" aria-labelledby="ageTitle"><div class="mbox">
   <svg class="ic mic"><use href="#i-age"/></svg>
   <h2 id="ageTitle">Are you 18 or older?</h2>
-  <p>You are opening <b>Liquor</b>: wine, spirits and beer. Not for sale to persons under 18. ID is checked on delivery.</p>
+  <p>You are opening <b>Liquor</b>: wine, spirits and beer. Not for sale to persons under 18. ID is checked at purchase.</p>
   <div class="row2">
     <button class="btn w" id="ageNo" type="button">No, go back</button>
     <button class="btn g" id="ageYes" type="button">Yes, I am 18+</button>
@@ -757,8 +757,8 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
 
 <div class="modal" id="locModal"><div class="mbox">
   <svg class="ic mic"><use href="#i-pin"/></svg>
-  <h2>Select an area</h2>
-  <p>This preference does not confirm delivery coverage, availability or fees. Online ordering is not available.</p>
+  <h2>Choose a branch</h2>
+  <p>Xana has two branches. Choosing one does not confirm stock or prices at that branch. Online ordering is not available.</p>
   <div id="locList" style="display:grid;gap:8px;margin-top:14px"></div>
 </div></div>
 
@@ -880,7 +880,7 @@ const resetVisible = () => { shown = 48; };
 const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char => ({
   '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;',
 })[char]);
-const state = {browsing:false,div:'All',cat:'All',q:'',sort:'rec',max:Infinity,inStock:false,brands:new Set(),cart:{},orders:[],age:false,area:'Nairobi'};
+const state = {browsing:false,div:'All',cat:'All',q:'',sort:'rec',max:Infinity,inStock:false,brands:new Set(),cart:{},orders:[],age:false,branch:null};
 const savedBasket = BasketStorage.create(()=>window.localStorage);
 let basketNotices = [];
 let basketChecked = false;
@@ -1131,7 +1131,7 @@ function renderBasket(){
    <p class="foot-note">The subtotal covers products only. Delivery coverage, fees and a final order total are not confirmed.</p>
    <button class="checkout" id="coBtn" type="button" disabled aria-describedby="checkoutNotice">Checkout unavailable · Demo</button>
    <p class="foot-note" id="checkoutNotice">Browsing demo only. No order will be placed, no M-PESA prompt will be sent, and no payment will be taken.</p>
-   <p class="foot-note">Liquor is not sold to under-18s. ID is checked on delivery.</p>`;
+   <p class="foot-note">Liquor is not sold to under-18s. ID is checked at purchase.</p>`;
   const xb=foot.querySelector('.xadd');
   if(xb) xb.onclick=()=>add(xb.dataset.x,1);
 }
@@ -1440,11 +1440,17 @@ $('#ageNo').onclick=()=>{closeAll();window._pendingDiv=null;window._pendingScrol
 /* pharmacy and retail panels */
 $('#rbUpload').onclick=openRx;
 $('#rbShop').onclick=()=>goShop('Pharmacy');
-$('#locChange').onclick=()=>{ renderLoc(); openModal('#locModal'); };
+const BRANCHES=[{id:'Syokimau',label:'Syokimau · Bellway Park'},{id:'Ruiru',label:'Ruiru'}];
+$('#locChange').onclick=$('#locName').onclick=()=>{ renderLoc(); openModal('#locModal'); };
 function renderLoc(){
-  const areas=['Nairobi · Ruaka','Nairobi · Kilimani','Nairobi · Westlands','Nairobi · Embakasi','Nairobi · Karen','Kiambu · Thika Rd'];
-  $('#locList').innerHTML=areas.map(a=>`<button class="btn ${a.includes(state.area)?'g':'w'}" data-a="${a}">${a}</button>`).join('');
-  $('#locList').querySelectorAll('button').forEach(b=>b.onclick=()=>{state.area=b.dataset.a.split('·')[1].trim();$('#locName').textContent=state.area;closeAll();toast('Selected area: '+state.area);});
+  $('#locList').innerHTML=BRANCHES.map(br=>`<button type="button" class="btn ${br.id===state.branch?'g':'w'}" data-b="${br.id}">${br.label}</button>`).join('');
+  $('#locList').querySelectorAll('button').forEach(b=>b.onclick=()=>{
+    state.branch=b.dataset.b;
+    $('#locName').textContent=state.branch;
+    $('#locName').setAttribute('aria-label','Branch: '+state.branch+'. Change branch');
+    $('#locChange').textContent='Change branch';
+    closeAll(); toast('Branch: '+state.branch);
+  });
 }
 document.querySelectorAll('#bottomNav .navbtn').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('#bottomNav .navbtn').forEach(x=>x.classList.remove('active')); b.classList.add('active');
