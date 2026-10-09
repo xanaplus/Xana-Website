@@ -19,7 +19,7 @@ test('delivery is not quoted or advertised as free in any area', () => {
   assert.doesNotMatch(html, /free delivery|delivery unlocked|reaches free delivery|del=sub|ksh\(tot\)/i);
   assert.match(html, /<span>Delivery<\/span><b>Not quoted<\/b>/);
   assert.match(html, /subtotal covers products only/);
-  assert.match(html, /preference does not confirm delivery coverage/);
+  assert.match(html, /Delivery coverage, fees and a final order total are not confirmed/);
   assert.doesNotMatch(html, /Delivering to/);
 });
 
