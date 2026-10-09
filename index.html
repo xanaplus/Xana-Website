@@ -765,11 +765,11 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 
-<script src="assets/catalogue-rules.js"></script>
+<script src="assets/catalogue-rules.js?v=20261009-units"></script>
 <script src="assets/home-catalogue.js?v=20261009-3"></script>
-<script src="assets/basket-storage.js"></script>
+<script src="assets/basket-storage.js?v=20261009-units"></script>
 <script src="/assets/product-images.js"></script>
-<script src="/assets/product-detail.js?v=20261009-service-info"></script>
+<script src="/assets/product-detail.js?v=20261009-units"></script>
 <script src="assets/site-motion.js"></script>
 <script src="assets/shop-home.js?v=20261009-4"></script>
 <script>
@@ -893,6 +893,10 @@ const productCategory=CatalogueRules.category;
 const inCategory=CatalogueRules.inCategory;
 const unitPrice=CatalogueRules.unitPrice;
 const activeTier=CatalogueRules.activeTier;
+const unitName=CatalogueRules.unitName;
+const perUnit=CatalogueRules.perUnit;
+const stockText=CatalogueRules.stockText;
+const unitConversions=CatalogueRules.conversions;
 function cartCount(){ return Object.values(state.cart).reduce((a,b)=>a+b,0); }
 function cartTotal(){ return Object.entries(state.cart).reduce((a,[id,q])=>a+unitPrice(prod(id),q)*q,0); }
 
@@ -943,7 +947,7 @@ function filtered(){
     if(!inDivision(p,state.div)) return false;
     if(state.cat==='On offer'){ if(!(p.old>p.price)) return false; }
     else if(!inCategory(p,state.div,state.cat)) return false;
-    if(state.q){ const q=state.q.toLowerCase(); if(!(p.name+' '+p.pack+' '+p.brand+' '+Object.values(p.categories||{main:p.cat}).join(' ')).toLowerCase().includes(q)) return false; }
+    if(state.q){ const q=state.q.toLowerCase(); if(!(p.name+' '+unitName(p)+' '+p.brand+' '+Object.values(p.categories||{main:p.cat}).join(' ')).toLowerCase().includes(q)) return false; }
     const eff = unitPrice(p,Math.max(state.cart[p.id]||0,1));
     if(eff>state.max) return false;
     if(state.inStock&&p.stock<=0) return false;
@@ -1020,7 +1024,7 @@ function createProductCard(p,index=0,isSpon=false,division=state.div){
     let tierHtml='';
     if(p.tiers){
       const on=activeTier(p,Math.max(q,1));
-      tierHtml=`<div class="tiers"><table><tr><th>Qty</th><th>Per unit</th></tr>${p.tiers.map((t,i)=>`<tr class="${i===on?'on':''}"><td>${escapeHtml(t.l)}</td><td>${ksh(t.p)}</td></tr>`).join('')}</table></div>`;
+      tierHtml=`<div class="tiers"><table><tr><th>Qty</th><th>${escapeHtml(unitName(p)?'Per '+unitName(p):'Per unit')}</th></tr>${p.tiers.map((t,i)=>`<tr class="${i===on?'on':''}"><td>${escapeHtml(t.l)}</td><td>${ksh(t.p)}</td></tr>`).join('')}</table></div>`;
     }
     const priceNow = p.tiers?unitPrice(p,Math.max(q,1)):p.price;
     card.innerHTML=`
@@ -1034,7 +1038,7 @@ function createProductCard(p,index=0,isSpon=false,division=state.div){
       <div class="card-body">
         <div class="brandrow"><span>${escapeHtml(productCategory(p,division))}</span><span>${escapeHtml(p.tiers&&activeTier(p,q)>0?p.div+' · Wholesale price':p.div)}</span></div>
         <a class="pname" data-product-link href="${escapeHtml(window.XanaProductDetail.href(p.id))}" style="color:inherit;text-decoration:none">${escapeHtml(p.name)}</a>
-        <div class="pack">${escapeHtml(p.pack)}</div>
+        <div class="pack">${unitName(p)?escapeHtml('Price '+perUnit(p)):''}</div>
         <div class="pricerow"><span class="price"><small>KSh</small> ${priceNow.toLocaleString('en-KE')}</span>${p.old&&!p.tiers?`<span class="old">${ksh(p.old)}</span>`:''}</div>
         ${tierHtml}
         <div class="action"></div>
@@ -1069,7 +1073,7 @@ function add(id,d){
   if(d>0&&p.age&&!state.age){ window._pendingAdd=id; window._pendingAddQty=d; openModal('#ageModal'); return false; }
   const q=(state.cart[id]||0)+d;
   if(q<=0) delete state.cart[id];
-  else if(q>p.stock){ toast(`Only ${p.stock} left`); return false; }
+  else if(q>p.stock){ toast(`Only ${p.stock}${unitName(p)?' '+unitName(p):''} left`); return false; }
   else state.cart[id]=q;
   saveBasket();
   if(d>0) toast(`Added ${p.name}`);
@@ -1107,7 +1111,7 @@ function renderBasket(){
   ids.forEach(id=>{
     const p=prod(id),q=state.cart[id],u=unitPrice(p,q);
     const r=document.createElement('div'); r.className='brow';
-    r.innerHTML=`<div class="bi"${p.tint?` style="background:${p.tint}"`:''}>${p.img?productImageMarkup(p,{thumbnail:true,eager:true}):`<span class="mono" aria-hidden="true"><svg class="ic"><use href="#${p.icon||'i-package'}"/></svg></span>`}</div><div class="bn">${escapeHtml(p.name)}<small>${escapeHtml(p.pack)} · ${ksh(u)} each${activeTier(p,q)>0?' · Wholesale price':''}</small><small><b>${ksh(u*q)}</b></small></div>`;
+    r.innerHTML=`<div class="bi"${p.tint?` style="background:${p.tint}"`:''}>${p.img?productImageMarkup(p,{thumbnail:true,eager:true}):`<span class="mono" aria-hidden="true"><svg class="ic"><use href="#${p.icon||'i-package'}"/></svg></span>`}</div><div class="bn">${escapeHtml(p.name)}<small>${ksh(u)} ${escapeHtml(perUnit(p))}${activeTier(p,q)>0?' · Wholesale price':''}</small><small><b>${ksh(u*q)}</b></small></div>`;
     const m=document.createElement('div'); m.className='mini';
     m.innerHTML=`<button>−</button><strong>${q}</strong><button>+</button>`;
     m.querySelectorAll('button')[0].onclick=()=>add(id,-1);

@@ -24,7 +24,8 @@ function classify(row, name) {
   return { div, group, code, rx, age, declared: !!declared };
 }
 
-function quantityTiers(value, basePrice) {
+// Tier minimums count the same BC selling unit as the standard price.
+function quantityTiers(value, basePrice, unitLabel) {
   if (value == null || (Array.isArray(value) && value.length === 0)) return undefined;
   if (!Array.isArray(value)) throw new Error('Catalogue contains invalid wholesale tiers');
   const tiers = value.map(tier => {
@@ -42,9 +43,10 @@ function quantityTiers(value, basePrice) {
     }
   }
   const all = [{ min: 1, p: basePrice }, ...tiers];
+  const unitWord = unitLabel || 'units';
   return all.map((tier, i) => ({
     ...tier,
-    l: i === all.length - 1 ? `${tier.min}+ units` : `${tier.min}–${all[i + 1].min - 1} units`,
+    l: i === all.length - 1 ? `${tier.min}+ ${unitWord}` : `${tier.min}–${all[i + 1].min - 1} ${unitWord}`,
   }));
 }
 

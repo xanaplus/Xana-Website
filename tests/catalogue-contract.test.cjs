@@ -65,7 +65,7 @@ test('old public view uses explicit compatibility path without fake tiers or pri
 
 test('published public classifications and tiers are consumed end to end', async () => {
   await withCatalogue(async () => page([{
-    ...row, website_division: 'Retail', website_category: 'Cooking',
+    ...row, website_division: 'Retail', website_category: 'Cooking', selling_unit: 'CTN',
     wholesale_tiers: [{ min_quantity: 6, unit_price: 450 }],
   }]), async serve => {
     const res = response();
@@ -103,5 +103,42 @@ test('authentication, unrelated schema failures and invalid upstream tiers canno
     await serve({ method: 'GET' }, res);
     assert.equal(res.status, 503);
     assert.ok(!res.body.includes('products'));
+  });
+});
+
+test('missing selling-unit columns are reported separately and never parsed from names', async () => {
+  const selects = [];
+  await withCatalogue(async url => {
+    const select = new URL(url).searchParams.get('select');
+    selects.push(select);
+    for (const column of ['website_division', 'selling_unit']) {
+      if (select.split(',').includes(column)) {
+        return new Response(JSON.stringify({ code: '42703', message: `column catalogue.${column} does not exist` }), { status: 400 });
+      }
+    }
+    return page([{ ...row, name: 'Mirinda 2L Bale 6 Pcs', stock: 3.5 }]);
+  }, async serve => {
+    const res = response();
+    await serve({ method: 'GET' }, res);
+    assert.equal(res.status, 200);
+    const data = JSON.parse(res.body);
+    assert.equal(data.classificationFieldsAvailable, false);
+    assert.equal(data.sellingUnitsAvailable, false);
+    assert.equal(data.products[0].unit, null);
+    assert.equal(data.products[0].stock, 3);
+    assert.ok(!('pack' in data.products[0]));
+    assert.equal(selects.length, 3);
+  });
+});
+
+test('published selling units are consumed end to end', async () => {
+  await withCatalogue(async () => page([{
+    ...row, selling_unit: 'CTN', selling_unit_label: 'carton', unit_conversions: [{ unit: 'PCS', qty_per_unit: 1 / 12 }],
+  }]), async serve => {
+    const res = response();
+    await serve({ method: 'GET' }, res);
+    const data = JSON.parse(res.body);
+    assert.equal(data.sellingUnitsAvailable, true);
+    assert.deepEqual(data.products[0].unit, { code: 'CTN', label: 'carton', conversions: [{ unit: 'PCS', qty: 1 / 12 }] });
   });
 });

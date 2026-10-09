@@ -52,7 +52,8 @@ Missing columns cause a specific, reported compatibility path
 failures do not fall back. Do not expose `products`, costs or margins.
 
 Quantity prices must be public, KSh, VAT-inclusive, for the same sellable unit
-as the standard price. Upstream must resolve currency, unit of measure,
+as the standard price. The website rejects tiers unless the selling-unit
+columns in `docs/selling-units.md` are also published. Upstream must resolve currency, unit of measure,
 customer eligibility, validity dates and discount combinations. Never publish
 customer-specific BC prices as public discounts. Tier minimums must be unique
 integers greater than one; prices must be positive, below standard price, and

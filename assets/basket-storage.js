@@ -49,7 +49,7 @@
           continue;
         }
         cart[id] = Math.min(quantity, Math.floor(p.stock));
-        if (cart[id] !== quantity) notices.push(`${p.name}: quantity reduced to ${cart[id]} to match current stock.`);
+        if (cart[id] !== quantity) notices.push(`${p.name}: quantity reduced to ${cart[id]}${p.unit?.label ? ` ${p.unit.label}` : ''} to match current stock.`);
       }
       const hadItems = entries.length > 0;
       save(cart);

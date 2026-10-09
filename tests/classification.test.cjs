@@ -57,7 +57,7 @@ test('authoritative division and category override hints without removing safety
 });
 
 test('verified six-unit tiers cross-list the same item and price exactly at each threshold', () => {
-  const p = product(item({ wholesale_tiers: [
+  const p = product(item({ selling_unit: 'PCS', wholesale_tiers: [
     { min_quantity: 12, unit_price: 160 },
     { min_quantity: 6, unit_price: 180 },
   ] }));
@@ -84,7 +84,7 @@ test('verified six-unit tiers cross-list the same item and price exactly at each
 });
 
 test('any number of numeric thresholds works; no tier-label parsing or fixed discount quantities', () => {
-  const p = product(item({ wholesale_tiers: [{ min_quantity: 7, unit_price: 150 }] }));
+  const p = product(item({ selling_unit: 'PCS', wholesale_tiers: [{ min_quantity: 7, unit_price: 150 }] }));
   assert.equal(p.tiers.length, 2);
   assert.equal(rules.unitPrice(p, 6), 200);
   assert.equal(rules.unitPrice(p, 7), 150);
@@ -110,7 +110,7 @@ test('invalid or contradictory prices fail explicitly, never fabricate discounts
 test('quantity pricing never clears Rx or age restrictions on a Wholesale shelf', () => {
   const wholesale_tiers = [{ min_quantity: 6, unit_price: 180 }];
   for (const overrides of [{ requires_rx: true }, { age_restricted: true }]) {
-    const p = product(item({ ...overrides, wholesale_tiers }));
+    const p = product(item({ ...overrides, selling_unit: 'PCS', wholesale_tiers }));
     assert.equal(rules.inDivision(p, 'Wholesale'), true);
     assert.equal(p.rx, !!overrides.requires_rx);
     assert.equal(p.age, !!overrides.age_restricted);

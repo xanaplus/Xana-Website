@@ -5,6 +5,8 @@ const vm = require('node:vm');
 const { readProduct, productUrl, available, clampQuantity, viewStatus } = require('../assets/product-detail.js');
 const source = fs.readFileSync('assets/product-detail.js', 'utf8');
 const html = fs.readFileSync('index.html', 'utf8');
+const rules = require('../assets/catalogue-rules.js');
+const unitHelpers = { unitName: rules.unitName, perUnit: rules.perUnit, stockText: rules.stockText, unitConversions: rules.conversions };
 const inline = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 
 test('query URLs round-trip special item numbers, retain unrelated params and omit hash', () => {
@@ -62,7 +64,7 @@ function page(status = 'ready', products = [{ id: 'A&B', name: '<Unsafe>', div: 
   const context = vm.createContext({
     window, document, URL, module: undefined, catalogueStatus: status, PRODUCTS: products,
     state: { cart: {}, q: '' }, prod: id => products.find(p => p.id === id),
-    unitPrice: p => p.price, ksh: n => 'KSh ' + n,
+    ...unitHelpers, unitPrice: p => p.price, ksh: n => 'KSh ' + n,
     escapeHtml: value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]),
     productImageMarkup: () => '', closeAll() {},
     add: (...args) => calls.push(args), loadCatalogue() {},
@@ -152,7 +154,7 @@ function commerce(product) {
   const state = { cart: {}, age: false };
   const window = {};
   const context = vm.createContext({
-    prod: () => product, state, window,
+    ...unitHelpers, prod: () => product, state, window,
     toast: text => notices.push(text), openRx: () => modals.push('rx'),
     openModal: text => modals.push(text), renderAll() {}, renderBasket() {},
     saveBasket() {},

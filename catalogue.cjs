@@ -6,8 +6,14 @@ const COLUMNS = 'item_no,name,price,stock,category,item_category_code,requires_r
 // Optional public contract, not private products-table fields. The current app
 // view lacks these columns; only a specific missing-column response permits
 // the documented compatibility path. Auth/network/other failures remain errors.
-const CLASSIFICATION_COLUMNS = 'website_division,website_category,wholesale_tiers';
+// Each optional group is dropped only when PostgREST reports one of its own
+// columns missing; the response records which groups were available.
+const OPTIONAL_GROUPS = {
+  classification: ['website_division', 'website_category', 'wholesale_tiers'],
+  sellingUnits: ['selling_unit', 'selling_unit_label', 'unit_conversions'],
+};
 const { classify, quantityTiers } = require('./classification.cjs');
+const { sellingUnit, wholeStock } = require('./selling-units.cjs');
 let cached;
 let expiresAt = 0;
 let pending;
@@ -65,7 +71,10 @@ function product(row) {
   const price = Number(row.price);
   if (!Number.isFinite(price) || price <= 0) return null;
   const { div, group, rx, age, declared } = classify(row, name);
-  const tiers = quantityTiers(row.wholesale_tiers, price);
+  const unit = sellingUnit(row);
+  const tiers = quantityTiers(row.wholesale_tiers, price, unit?.label);
+  // A quantity price is ambiguous unless its selling unit is published too.
+  if (tiers && !unit) throw new Error('Catalogue quantity prices require a selling unit');
 
   let cat = categoryNames[group] || 'Other';
   if (div === 'Deli') cat = group === 'MEAT PRODUCTS' ? 'Meat & deli' : 'Prepared foods';
@@ -82,7 +91,6 @@ function product(row) {
   }
   const categories = { [div]: cat };
   if (tiers && div !== 'Wholesale') categories.Wholesale = `Bulk ${(categoryNames[group] || cat).toLowerCase()}`;
-  const pack = name.match(/\b\d+\s?'?s\b|\b\d+(?:[.,]\d+)?\s?(?:ml|ltrs?|lt|l|kg|gms?|g|mg|mcg|pcs|pc|pk|pack|tabs|caps)\b/gi)?.at(-1) || '';
   let img = '';
   try {
     const photo = new URL(row.photo_url);
@@ -93,14 +101,16 @@ function product(row) {
     id: row.item_no,
     name,
     price,
-    stock: Math.max(0, Number(row.stock) || 0),
+    // Price and stock are both per BC selling unit; `unit` is null until the
+    // shared catalogue publishes it. Pack contents are never parsed from names.
+    stock: wholeStock(row.stock),
+    unit,
     div,
     cat,
     divisions: Object.keys(categories),
     categories,
     classificationSource: declared ? 'shared-catalogue' : 'bc-groups-and-names',
     brand: cat,
-    pack,
     img,
     fit: img ? 'contain' : undefined,
     rx: rx || (div === 'Pharmacy' && row.requires_rx !== false),
@@ -133,25 +143,28 @@ async function loadCatalogue() {
     if (!response.ok) {
       const detail = await response.json().catch(() => ({}));
       const error = new Error(`Catalogue read failed (HTTP ${response.status})`);
-      error.missingClassification = response.status === 400 &&
-        ['42703', 'PGRST204'].includes(detail.code) &&
-        /(?:website_division|website_category|wholesale_tiers)/.test(detail.message || '');
+      if (response.status === 400 && ['42703', 'PGRST204'].includes(detail.code)) {
+        error.missingGroup = Object.keys(OPTIONAL_GROUPS).find(group =>
+          OPTIONAL_GROUPS[group].some(column => new RegExp(`\\b${column}\\b`).test(detail.message || '')));
+      }
       throw error;
     }
     const rows = await response.json();
     if (!Array.isArray(rows)) throw new Error('Catalogue returned an invalid response');
     return { rows, total: Number(response.headers.get('content-range')?.split('/')[1]) };
   }
-  endpoint.searchParams.set('select', `${COLUMNS},${CLASSIFICATION_COLUMNS}`);
+  const available = new Set(Object.keys(OPTIONAL_GROUPS));
+  const select = () => [COLUMNS, ...[...available].flatMap(group => OPTIONAL_GROUPS[group])].join(',');
   let first;
-  let classificationFieldsAvailable = true;
-  try {
-    first = await page(0, true);
-  } catch (error) {
-    if (!error.missingClassification) throw error;
-    classificationFieldsAvailable = false;
-    endpoint.searchParams.set('select', COLUMNS);
-    first = await page(0, true);
+  for (;;) {
+    endpoint.searchParams.set('select', select());
+    try {
+      first = await page(0, true);
+      break;
+    } catch (error) {
+      if (!error.missingGroup || !available.has(error.missingGroup)) throw error;
+      available.delete(error.missingGroup);
+    }
   }
   if (!Number.isSafeInteger(first.total) || first.total < 0) throw new Error('Catalogue count unavailable');
   const offsets = [];
@@ -163,7 +176,8 @@ async function loadCatalogue() {
   return {
     products,
     updatedAt: new Date().toISOString(),
-    classificationFieldsAvailable,
+    classificationFieldsAvailable: available.has('classification'),
+    sellingUnitsAvailable: available.has('sellingUnits'),
     quantityPricedProducts: products.filter(p => p.tiers).length,
   };
 }

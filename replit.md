@@ -19,6 +19,7 @@ Today `index.html` is a working demo. Basket item numbers and quantities are sav
 - The production site at Vercel also requires **these two environment variable names** in its Vercel project settings before deploying the updated website. Replit Secrets do not transfer to Vercel. Set them for Production (and Preview if desired), then redeploy; do not sync this change to a live Vercel site before configuring its environment.
 - `/api/catalogue` is a Vercel function in production and is served by `server.cjs` for Replit preview. Both share the same read-only handler. No database migration or separate database is needed. This is not an order or payment backend.
 - The app's catalogue does not include discounted/wholesale tier prices; the website does not fabricate these. Existing product-specific demo ad bookings need matching Business Central item numbers before they can appear with live catalogue items.
+- Selling units: BC prices and stock are per the item's BC base unit, which the shared catalogue does not publish yet. The site no longer reads pack sizes from names, offers whole units only, and shows the unit once `selling_unit` is published. See `docs/selling-units.md`; do not enable real checkout before then.
 - Division matching and the optional shared-catalogue contract are documented in `docs/catalogue-classification.md`. The website can consume verified item-specific tiers when the app publishes them, but no live BC tiers or dedicated website classifications have been added upstream yet.
 
 ## Rules
