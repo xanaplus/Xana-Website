@@ -6,7 +6,7 @@ Read this first, then `AGENTS.md`, `docs/adr/` and `design/README.md`.
 
 Xana Life is an online shop in Nairobi with five divisions: Pharmacy, Retail, Deli, Liquor and Wholesale, plus clinic bookings. The design is **finished and approved**. The 19 screens are in `design/screens/`. The live front end is a single static file, `index.html`, with `assets/` and `img/`. It is deployed at https://xana-web.vercel.app/.
 
-Today `index.html` is a working demo. The basket, checkout, orders, prescription upload and clinic booking all run only in the browser. Nothing is saved or sent anywhere. The goal is to make these real for a launch.
+Today `index.html` is a working demo. Basket item numbers and quantities are saved locally on the shopper's device and checked against the live catalogue before restoration. Prices, age confirmations, prescriptions and customer details are not saved with the basket. Missing, unavailable and prescription items are removed; age-restricted items must be added again through the age check after reopening. Catalogue failures retain saved entries for retry without showing unverified totals. Checkout remains disabled; orders, prescription upload and clinic booking are browser-only simulations. The goal is to make these real for a launch.
 
 ## Run the imported demo on Replit
 

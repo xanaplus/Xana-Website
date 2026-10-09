@@ -780,6 +780,7 @@ footer .fbtn:hover{color:var(--green);text-decoration:underline;text-underline-o
 
 
 <script src="assets/catalogue-rules.js"></script>
+<script src="assets/basket-storage.js"></script>
 <script src="/assets/product-images.js"></script>
 <script src="/assets/product-detail.js"></script>
 <script src="assets/site-motion.js"></script>
@@ -897,6 +898,10 @@ const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char => ({
   '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;',
 })[char]);
 const state = {div:'All',cat:'All',q:'',sort:'rec',max:Infinity,inStock:false,brands:new Set(),cart:{},orders:[],age:false,area:'Nairobi'};
+const savedBasket = BasketStorage.create(()=>window.localStorage);
+let basketNotices = [];
+let basketChecked = false;
+function saveBasket(){ savedBasket.save(state.cart); }
 const $ = s=>document.querySelector(s);
 const ksh = n=>'KSh '+Number(n).toLocaleString('en-KE');
 const prod = id=>PRODUCTS.find(p=>p.id===id);
@@ -1082,6 +1087,7 @@ function add(id,d){
   if(q<=0) delete state.cart[id];
   else if(q>p.stock){ toast(`Only ${p.stock} left`); return false; }
   else state.cart[id]=q;
+  saveBasket();
   if(d>0) toast(`Added ${p.name}`);
   renderAll(false);
   /* keep an open basket drawer in sync, so the top-up row and delivery bar update in place */
@@ -1095,16 +1101,25 @@ function renderBasketMeta(){
   if(n>lastCount){ bump($('#basketCount')); bump($('#navCount')); }
   lastCount=n;
   $('#basketCount').textContent=cartCount();
-  $('#basketTotal').textContent=ksh(cartTotal());
+  $('#basketTotal').textContent=catalogueStatus==='ready'?ksh(cartTotal()):'Unavailable';
   const nc=$('#navCount'); nc.style.display=cartCount()?'grid':'none'; nc.textContent=cartCount();
   const _n=cartCount(); $('#dCount').textContent=_n?`· ${_n} item${_n===1?'':'s'}`:'';
 }
 function renderBasket(){
   renderBasketMeta();
   const body=$('#basketBody'),foot=$('#basketFoot');
+  const messages = [...basketNotices];
+  if(savedBasket.warning) messages.push(savedBasket.warning);
+  if(catalogueStatus!=='ready'){
+    body.innerHTML=`<div class="empty"><b>${catalogueStatus==='error'?'Basket temporarily unavailable':'Checking your saved basket'}</b><span>${catalogueStatus==='error'?'The live catalogue could not be checked. Saved items are kept on this device for retry; prices and totals are unavailable.':'Items and current prices will appear after the live catalogue loads.'}</span>${catalogueStatus==='error'?'<button type="button" class="btn g" id="retryBasket">Try again</button>':''}</div>`;
+    foot.innerHTML='';
+    if(catalogueStatus==='error') $('#retryBasket').onclick=loadCatalogue;
+    return;
+  }
+  const notice=messages.length?`<div role="status">${messages.map(message=>`<p>${escapeHtml(message)}</p>`).join('')}</div>`:'';
   const ids=Object.keys(state.cart);
-  if(!ids.length){ body.innerHTML=`<div class="empty"><svg class="ic ic-lg"><use href="#i-basket"/></svg><b>Your basket is empty</b><span>Add medicines, groceries or bulk stock to get started.</span></div>`; foot.innerHTML=''; return; }
-  body.innerHTML='';
+  if(!ids.length){ body.innerHTML=notice+`<div class="empty"><svg class="ic ic-lg"><use href="#i-basket"/></svg><b>Your basket is empty</b><span>Add medicines, groceries or bulk stock to get started.</span></div>`; foot.innerHTML=''; return; }
+  body.innerHTML=notice;
   ids.forEach(id=>{
     const p=prod(id),q=state.cart[id],u=unitPrice(p,q);
     const r=document.createElement('div'); r.className='brow';
@@ -1197,11 +1212,14 @@ async function loadCatalogue(){
     }
     CATS.All=['All',...new Set(DIVS.slice(1).flatMap(div=>CATS[div.id].slice(1)))];
     if(state.cat!=='All'&&state.cat!=='On offer'&&!CATS[state.div].includes(state.cat)) state.cat='All';
-    for(const [id,qty] of Object.entries(state.cart)){
-      const item=prod(id);
-      if(!item||item.stock<=0) delete state.cart[id];
-      else state.cart[id]=Math.min(qty,item.stock);
+    const restored=savedBasket.restore(PRODUCTS,state.age);
+    state.cart=restored.cart;
+    basketNotices=[...basketNotices,...restored.notices];
+    if(!basketChecked&&restored.hadItems) {
+      basketNotices.unshift('Saved basket checked against the live catalogue. All prices use current catalogue prices.');
+      toast('Saved basket checked. Open your basket to review current items and prices.');
     }
+    basketChecked=true;
     catalogueStatus='ready';
     renderAll();
     if($('#basketDrawer').classList.contains('show'))renderBasket();

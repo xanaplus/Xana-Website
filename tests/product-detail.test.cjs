@@ -128,6 +128,7 @@ function commerce(product) {
     prod: () => product, state, window,
     toast: text => notices.push(text), openRx: () => modals.push('rx'),
     openModal: text => modals.push(text), renderAll() {}, renderBasket() {},
+    saveBasket() {},
     $: () => ({ classList: { contains: () => false } }),
   });
   vm.runInContext(inline.slice(inline.indexOf('function add(id,d){'), inline.indexOf('let lastCount=0;')), context);
