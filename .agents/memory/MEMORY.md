@@ -1,3 +1,4 @@
 - [GitHub source-control authentication](github-auth.md) — Git source-control recovery uses Git Providers settings, not ordinary integration connection cards.
+- [Dependency portability](dependency-portability.md) — Replit-generated internal registry URLs must not reach Vercel builds.
 - [Shared Xana Plus data](shared-xana-data.md) — the website must share the Xana Plus App database rather than use a separate store.
 - [Wholesale business rules](wholesale-business-rules.md) — wholesale can depend on quantity; BC supplies actual thresholds and prices, not a universal six-unit rule.
