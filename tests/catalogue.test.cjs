@@ -32,6 +32,13 @@ test('maps customer-facing fields only and treats unknown pharmacy Rx status saf
   assert.equal(product(item({ price: 0 })), null);
 });
 
+test('product photos fit completely inside their cards without cropping', () => {
+  const mapped = product(item({ photo_url: 'https://example.com/tall-pack.jpg' }));
+  assert.equal(mapped.fit, 'contain');
+  assert.equal(mapped.img, 'https://example.com/tall-pack.jpg');
+  assert.equal(product(item({ photo_url: 'javascript:alert(1)' })).img, '');
+});
+
 test('liquor remains age-restricted and bulk items use actual unit prices without invented tiers', () => {
   const liquor = product(item({ item_no: 'WS001', name: 'Tusker Lager', category: 'WINES & SPIRITS', item_category_code: 'RETAIL', age_restricted: true, requires_rx: false }));
   assert.equal(liquor.div, 'Liquor');

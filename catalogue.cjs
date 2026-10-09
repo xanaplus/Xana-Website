@@ -95,7 +95,7 @@ function product(row) {
     brand: cat,
     pack,
     img,
-    fit: img ? 'cover' : undefined,
+    fit: img ? 'contain' : undefined,
     rx: row.requires_rx === true || (div === 'Pharmacy' && row.requires_rx !== false),
     age: div === 'Liquor',
   };

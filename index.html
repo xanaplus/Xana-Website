@@ -208,9 +208,8 @@ header.app{position:sticky;top:0;z-index:40;background:#fff;border-bottom:1px so
 }
 .card:hover{border-color:#BFD3C4}
 .img{aspect-ratio:4/3;position:relative;overflow:hidden;background:#fff;border-bottom:1px solid var(--line-2)}
-.img img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:14px}
-/* phone snapshots fill the frame, cropped in on the pack; studio cut-outs stay whole on white */
-.img.cover img{object-fit:cover;padding:0}
+.img img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center;padding:14px}
+/* Keep the complete product visible, including older records marked "cover". */
 .img .mono{position:absolute;inset:0;display:grid;place-items:center;color:var(--green);background:#F6F7F5}
 .img .mono .ic{font-size:40px}
 .disc{position:absolute;top:10px;left:10px;background:var(--yellow);color:#22170A;font-size:11.5px;font-weight:700;border-radius:6px;padding:3px 7px;z-index:2}
@@ -275,9 +274,9 @@ header.app{position:sticky;top:0;z-index:40;background:#fff;border-bottom:1px so
 .offer-slide.tone-green{background:var(--green)}
 .offer-slide.tone-ink{background:var(--ink)}
 .offer-slide.tone-gold{background:var(--gold);color:#1B1204}
-/* the product photo fills a square tile; never stretched across the banner or faded into the colour */
+/* Product photos fit inside the square tile without cropping or stretching. */
 .offer-art{aspect-ratio:1/1;border-radius:12px;background:#fff;overflow:hidden;display:grid;place-items:center}
-.offer-art img{width:100%;height:100%;object-fit:cover;display:block}
+.offer-art img{width:100%;height:100%;object-fit:contain;object-position:center;padding:12px;display:block}
 .offer-art .ic{font-size:52px;color:var(--green)}
 .offer-copy{min-width:0;display:flex;flex-direction:column;gap:6px}
 .offer-h{font-family:var(--font-d);font-weight:800;font-size:clamp(21px,2.1vw,30px);line-height:1.1;letter-spacing:-.015em;max-width:26ch;text-wrap:balance}
@@ -418,7 +417,7 @@ nav.bottom{
 .brow:last-child{border-bottom:0}
 .bi{width:50px;height:50px;border-radius:var(--rc);flex:0 0 50px;overflow:hidden;position:relative;background:#EDF1EB;display:grid;place-items:center;color:var(--green)}
 .bi .ic{font-size:22px}
-.bi img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.bi img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center;padding:4px;background:#fff}
 .bi .mono{position:absolute;inset:0;display:grid;place-items:center;background:var(--green);color:var(--yellow)}
 .bi .mono .ic{font-size:22px}
 .bn{font-size:13.5px;font-weight:600;flex:1;min-width:0}

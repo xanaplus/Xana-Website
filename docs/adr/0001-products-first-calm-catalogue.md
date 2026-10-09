@@ -14,7 +14,7 @@ The owner found the earlier page cluttered and "AI obvious", and pointed at http
 - **One accent colour, green.** Gold/yellow is used only for discount badges.
 - **No decoration that reads as generated:** no gradients, glows, swooshes, icons in front of headings, eyebrow labels above headings, hover lift/zoom, or scroll-in animations. Motion is limited to explaining an action (basket bounce, drawer slide, modal and toast entrance).
 - **Type:** Libre Franklin for headings and prices, Atkinson Hyperlegible Next for text, both self-hosted in `assets/fonts/`. Digits always come from Franklin (Atkinson slashes its zero).
-- **Product cards share one anatomy:** brand and division, name, pack, large price, (wholesale) tier table, one "Add to basket" button. Studio cut-outs sit whole on white; phone snapshots (`fit:'cover'` in `PRODUCTS`, with optional `pos`) fill the frame cropped on the pack.
+- **Product cards share one anatomy:** brand and division, name, pack, large price, (wholesale) tier table, one "Add to basket" button. Product photos sit whole on white without cropping or stretching, including basket thumbnails and product promotions. Updated at the owner's request on 2026-10-09 because the crop-to-fill treatment cut off products; card dimensions remain unchanged.
 
 ## Consequences
 
