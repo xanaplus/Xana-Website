@@ -1,0 +1,1 @@
+- [GitHub source-control authentication](github-auth.md) — Git source-control recovery uses Git Providers settings, not ordinary integration connection cards.
