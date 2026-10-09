@@ -3,5 +3,6 @@
 - [Wholesale business rules](wholesale-business-rules.md) — wholesale can depend on quantity; BC supplies actual thresholds and prices, not a universal six-unit rule.
 - [Static asset freshness](static-asset-freshness.md) — version changed CSS/JS URLs so repeat visitors receive matching storefront assets.
 - [Confirmed business details](business-details.md) — only owner-confirmed branches/contacts/hours go on the site; PPB licence and hours still unconfirmed.
+- [Deli classification](deli-classification.md) — Deli comes only from BC DELI code; owner chose fixing codes in BC, no website name rules.
 - [BC selling units](selling-units.md) — price/stock are per BC base unit; never parse packs from names; no checkout until selling_unit is published.
 - [Branch stock](branch-stock.md) — catalogue has no per-location stock; branch picker is a saved preference only, keep stock disclaimer.
