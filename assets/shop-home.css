@@ -3,59 +3,50 @@
 .home-heading{display:flex;align-items:end;justify-content:space-between;gap:18px;margin-bottom:20px}
 .home-kicker{font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--green);margin-bottom:6px}
 .home-heading h2{font-size:clamp(25px,3vw,36px);line-height:1.15;font-weight:800;letter-spacing:-.035em}
-.home-heading p:not(.home-kicker){color:var(--muted);margin-top:7px;max-width:58ch}
+.home-heading p:not(.home-kicker){color:var(--muted);margin-top:7px;max-width:48ch}
 .home-heading .btn{flex-shrink:0}
 .home-actions{display:flex;flex-direction:column;align-items:end;gap:9px;flex-shrink:0}
-.home-categories{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:12px;margin-bottom:28px}
-.home-category{border:1px solid var(--line);border-radius:var(--r);background:var(--card);padding:0;overflow:hidden;text-align:left;cursor:pointer;min-width:0}
-.home-category:hover{border-color:var(--green)}
-.home-category-art{display:block;position:relative;aspect-ratio:1.15;background:#EEF3E9;overflow:hidden}
-.home-category-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.home-category-art.catalogue-photo{background:var(--card)}
-.home-category-art.catalogue-photo img{object-fit:contain;padding:12px}
-.home-category-art .ic{position:absolute;inset:0;margin:auto;font-size:36px;color:var(--green)}
-.home-category-copy{display:block;padding:12px 10px 13px}
+.home-categories{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:18px;margin-bottom:26px}
+.home-category{border:0;background:none;padding:4px 0;text-align:left;cursor:pointer;min-width:0;display:flex;align-items:center;gap:10px}
+.home-category:hover strong{color:var(--green);text-decoration:underline;text-underline-offset:3px}
+.home-category-art{display:block;position:relative;width:44px;height:44px;flex:0 0 44px;border-radius:10px;background:#EAF2EB;overflow:hidden}
+.home-category-art .ic{position:absolute;inset:0;margin:auto;font-size:23px;color:var(--green)}
+.home-category-copy{display:block;padding:0}
 .home-category-copy strong{font-family:var(--font-d);font-size:13px;line-height:1.3;display:block;overflow-wrap:anywhere}
-.home-category-copy small{display:block;color:var(--muted);font-size:11.5px;margin-top:4px}
-.home-category-copy small .ic{margin-left:4px}
-.home-collections{display:grid;gap:30px}
+.home-collections{display:grid;gap:24px}
 .home-shelf-head{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:13px}
-.home-shelf-head h3{font-size:24px;font-weight:800;line-height:1.2}
+.home-shelf-head h3{font-size:22px;font-weight:750;line-height:1.2}
 .home-shelf-head p{color:var(--muted);font-size:13px;margin-top:5px}
 .home-shelf-link{border:0;background:none;color:var(--green);font-weight:700;cursor:pointer;padding:10px 0;flex-shrink:0;text-decoration:underline;text-underline-offset:4px}
 .home-shelf .grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+.home-shelf .card{border:0;border-radius:10px}
+.home-shelf .img{border-bottom:0}
 .home-state{padding:26px;border:1px solid var(--line);border-radius:var(--r);background:#EEF3E9;color:var(--muted);margin-bottom:24px}
 .home-state b{display:block;font-family:var(--font-d);color:var(--ink);font-size:19px;margin-bottom:6px}
 .home-state .btn{margin-top:14px}
-.home-loading-tile{border-radius:var(--r);height:160px}
-.home-services-label{margin:30px 0 10px;font-size:12px;color:var(--green);font-weight:700;text-transform:uppercase;letter-spacing:.07em}
-.leads{margin-top:12px}
+.home-loading-tile{border-radius:10px;height:52px}
+.leads{margin-top:12px;grid-template-columns:minmax(0,1fr)}
+.leads .lead{border:0;background:none;padding:12px 0}
+.leads .lead-img{display:grid;place-items:center;background:#EAF2EB;color:var(--green)}
+.leads .lead-img .ic{font-size:28px}
+.bulk{border:0;background:none;padding:18px 0;margin-top:22px}
+.bulk p{max-width:46ch}
 .home-clinic-link{font-size:13px;font-weight:600;color:var(--green);background:none;border:0;padding:2px 0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
-body.shop-browsing :is(.home-shop,.home-services-label,.leads,.offers,.bulk,.capture,.offerbar),
-body.product-view :is(.home-shop,.home-services-label){display:none!important}
-body.shop-browsing.has-offerbar{padding-bottom:78px}
+body:not(.shop-browsing):not(.product-view) #main{display:none}
+body.shop-browsing :is(.home-shop,.leads,.offers,.bulk,.capture),
+body.product-view :is(.home-shop){display:none!important}
 .shop-browsing #main{padding-top:1px}
-@media(min-width:1024px){body.shop-browsing.has-offerbar{padding-bottom:0}}
-@media(max-width:1100px){.home-categories{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.home-category-art{aspect-ratio:1.7}}
+@media(max-width:1100px){.home-categories{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}}
 @media(max-width:767px){
   .home-shop{padding-top:20px}
   .home-heading{display:block}
   .home-actions{flex-direction:row;align-items:center;justify-content:space-between;gap:12px;margin-top:13px}
   .home-heading .btn{padding:9px 14px}
-  .home-categories{grid-template-columns:none;grid-template-rows:repeat(2,auto);grid-auto-flow:column;grid-auto-columns:155px;overflow-x:auto;scroll-snap-type:x proximity;gap:10px;margin-bottom:24px;padding:3px 3px 12px}
-  .home-category{scroll-snap-align:start}
-  .home-category-art{aspect-ratio:1.8}
-  .home-category-copy{padding:10px 12px}
-  .home-category-copy strong{font-size:14px}
+  .home-categories{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:22px}
+  .home-category-copy strong{font-size:13px}
   .home-shelf .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
   .home-shelf-head h3{font-size:21px}
   .home-shelf-head{gap:10px;align-items:center}
   .home-shelf-link{font-size:13px}
   .home-collections{gap:25px}
-  .home-services-label{margin-top:26px}
 }
-@media(hover:hover) and (prefers-reduced-motion:no-preference){
-  .home-category{transition:transform 140ms var(--motion-ease)}
-  .home-category:hover{transform:translateY(-2px)}
-}
-@media(prefers-reduced-motion:reduce){.home-category{transition:none;transform:none}}

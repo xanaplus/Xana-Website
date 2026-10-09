@@ -9,8 +9,8 @@ const inline = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 const source = fs.readFileSync('assets/shop-home.js','utf8');
 const css = fs.readFileSync('assets/shop-home.css','utf8');
 const product = overrides => ({
-  id:'001',name:'Carton of vitamins',div:'Retail',cat:'Kitchen',
-  categories:{Retail:'Kitchen'},divisions:['Retail'],stock:7,price:187,
+  id:'001',name:'Rice pack',div:'Retail',cat:'Rice & grains',
+  categories:{Retail:'Rice & grains'},divisions:['Retail'],stock:7,price:187,
   img:'img/app/rice-grains.jpg',pack:'1 pack',...overrides,
 });
 const freshState = () => ({
@@ -26,7 +26,9 @@ test('shortcut destinations use actual division/category pairs, including tier c
   ];
   const tiles = home.shortcuts(products);
   assert.ok(tiles.some(t => t.div === 'Wholesale' && t.cat === 'All'));
-  assert.ok(tiles.some(t => t.div === 'Retail' && t.cat === 'Unusual category'));
+  assert.ok(tiles.some(t => t.div === 'Retail' && t.cat === 'All'));
+  assert.ok(tiles.every(t => t.cat === 'All' && !t.image));
+  assert.ok(tiles.length <= 5);
   for (const tile of tiles) {
     assert.equal(tile.count,home.members(products,tile.div,tile.cat).length);
     assert.ok(tile.count > 0);
@@ -37,7 +39,7 @@ test('shortcut destinations use actual division/category pairs, including tier c
   assert.deepEqual(home.shortcuts([]),[]);
 });
 
-test('collections contain original live items, no Rx/age promotion or duplicated SKU', () => {
+test('two category-labelled collections contain available photographed items, never implied staff picks', () => {
   const products = [
     product({id:'plain',img:''}),
     product({id:'photo'}),
@@ -45,18 +47,21 @@ test('collections contain original live items, no Rx/age promotion or duplicated
     product({id:'rx',rx:true,div:'Pharmacy',divisions:['Pharmacy']}),
     product({id:'age',age:true,div:'Wholesale',divisions:['Wholesale']}),
     product({id:'care',div:'Pharmacy',divisions:['Pharmacy'],cat:'Devices'}),
-    product({id:'bulk',div:'Retail',divisions:['Retail','Wholesale'],categories:{Retail:'Food',Wholesale:'Bulk staples'}}),
+    product({id:'bulk',div:'Retail',divisions:['Retail','Wholesale'],categories:{Retail:'Beverages',Wholesale:'Bulk staples'}}),
     product({id:'only-bulk',div:'Wholesale',divisions:['Wholesale']}),
   ];
   const collections = home.collections(products);
-  assert.deepEqual(collections.map(c => c.div),['Retail','Pharmacy','Wholesale']);
+  assert.deepEqual(collections.map(c => c.div),['Retail','Retail']);
+  assert.deepEqual(collections.map(c => c.label),['Rice & grains','Beverages']);
   const items = collections.flatMap(c => c.products);
   assert.equal(new Set(items.map(p => p.id)).size,items.length);
-  assert.ok(items.every(p => products.includes(p) && !p.rx && !p.age));
+  assert.ok(items.every(p => products.includes(p) && !p.rx && !p.age && p.stock > 0 && p.img));
   assert.equal(collections[0].products[0].id,'photo');
   for (const collection of collections) {
     assert.ok(collection.products.length <= 4);
     assert.ok(collection.products.every(p => rules.inDivision(p,collection.div)));
+    assert.ok(collection.products.every(p => rules.inCategory(p,collection.div,collection.cat)));
+    assert.doesNotMatch(collection.label+' '+collection.copy,/picks|best.?sellers|curated|recommended/i);
   }
   assert.deepEqual(home.collections([]),[]);
   assert.deepEqual(home.collections([product({rx:true})]),[]);
@@ -65,7 +70,7 @@ test('collections contain original live items, no Rx/age promotion or duplicated
 test('homepage visibility covers every browsing filter and PDP; reset preserves basket and age', () => {
   assert.equal(home.isHome(freshState()),true);
   for (const changes of [{q:'milk'},{div:'Pharmacy'},{cat:'Kitchen'},{sort:'lo'},
-    {max:200},{inStock:true},{brands:new Set(['Actual brand'])}]) {
+    {max:200},{inStock:true},{brands:new Set(['Actual brand'])},{browsing:true}]) {
     assert.equal(home.isHome({...freshState(),...changes}),false);
   }
   assert.equal(home.isHome(freshState(),'001'),false);
@@ -102,6 +107,7 @@ test('actual goShop leaves PDP, resets stale filters, selects exact pair and foc
   assert.equal(app.browsed,1);
   assert.equal(app.state.div,'Wholesale');
   assert.equal(app.state.cat,'Bulk staples');
+  assert.equal(app.state.browsing,true);
   assert.equal(app.state.q,'');
   assert.equal(app.state.max,Infinity);
   assert.equal(app.state.brands.size,0);
@@ -180,7 +186,7 @@ test('homepage adapter renders skeletons, retryable error, composed empty state 
   const loading = adapter();
   loading.render();
   assert.equal(loading.node('#homeShop').attrs['aria-busy'],'true');
-  assert.equal((loading.node('#homeCategories').innerHTML.match(/aria-hidden="true"/g)||[]).length,8);
+  assert.equal((loading.node('#homeCategories').innerHTML.match(/aria-hidden="true"/g)||[]).length,5);
   const error = adapter('error');
   error.render();
   assert.match(error.node('#homeCollections').innerHTML,/could not check the live catalogue/);
@@ -198,7 +204,7 @@ test('homepage adapter renders skeletons, retryable error, composed empty state 
 });
 test('home navigation clears department and filters and restores heading focus', () => {
   const app = adapter('ready',[product()]);
-  app.context.state.div='Retail'; app.context.state.q='milk';
+  app.context.state.browsing=true; app.context.state.div='Retail'; app.context.state.q='milk';
   app.context.state.cat='Household'; app.context.state.max=100;
   let browsed=false,rendered=false,focused=false,scrolled=false;
   app.window.XanaProductDetail={browse(){browsed=true;}};
@@ -212,6 +218,7 @@ test('home navigation clears department and filters and restores heading focus',
   assert.equal(app.context.state.cat,'All');
   assert.equal(app.context.state.q,'');
   assert.equal(app.context.state.max,Infinity);
+  assert.equal(app.context.state.browsing,false);
   assert.ok(browsed && rendered && focused && scrolled);
 });
 test('adapter hides on search/filter/PDP and reuses unchanged DOM on routine rerender', () => {
@@ -263,12 +270,59 @@ test('shared card/PDP integration, browsing suppression, keyboard and reduced mo
   assert.match(inline,/b\.onclick=openRx/);
   assert.match(inline,/act\.innerHTML=`<button class="addbtn" disabled/);
   assert.match(fs.readFileSync('assets/product-detail.js','utf8'),/scope\.XanaHome\?\.render\(\)/);
-  assert.match(css,/body\.shop-browsing :is\([^)]*\.offers[^)]*\.bulk[^)]*\.offerbar/);
+  assert.match(css,/body\.shop-browsing :is\([^)]*\.offers[^)]*\.bulk/);
   assert.match(css,/body\.product-view :is\(\.home-shop/);
-  assert.match(css,/prefers-reduced-motion:reduce/);
+  assert.doesNotMatch(css,/animation:|transition:|translateY/);
   assert.match(source,/event\.key === 'Tab'/);
   assert.match(source,/event\.key === 'Escape'/);
   assert.doesNotMatch(html,/within 30 minutes|about 45 minutes/);
   assert.doesNotThrow(()=>new vm.Script(inline));
   assert.doesNotThrow(()=>new vm.Script(source));
+});
+test('ambiguous or conflicting records are omitted only from home; catalogue membership is unchanged', () => {
+  const products = [
+    product({id:'dose',name:'Amoxicillin 500mg'}),
+    product({id:'form',name:'Unknown tablets'}),
+    product({id:'beer',name:'Tusker Lager'}),
+    product({id:'cross',divisions:['Retail','Pharmacy']}),
+    product({id:'unknown',cat:'Unverified',categories:{Retail:'Unverified'}}),
+    product({id:'missing',img:''}),
+    product({id:'unpriced',price:0}),
+    product({id:'unavailable',stock:0}),
+  ];
+  const before = JSON.stringify(products);
+  assert.deepEqual(home.collections(products),[]);
+  assert.equal(home.members(products,'Retail').length,products.length);
+  assert.equal(JSON.stringify(products),before);
+  const plenty = Array.from({length:15},(_,i)=>product({
+    id:String(i),cat:['Beverages','Snacks','Foodstuffs'][i%3],
+    categories:{Retail:['Beverages','Snacks','Foodstuffs'][i%3]},
+  }));
+  const shelves = home.collections(plenty,20);
+  assert.equal(shelves.length,2);
+  assert.ok(shelves.every(s=>s.products.length===4));
+});
+test('Browse all remains browsing with All/All and no filters, including after a PDP return', () => {
+  const nav = navigation();
+  nav.go('All','All');
+  assert.equal(home.isHome(nav.state),false);
+  const app = adapter('ready',[product()]);
+  app.context.state.browsing=true;
+  app.render();
+  assert.equal(app.node('#homeShop').hidden,true);
+  app.window.location.href='https://shop.example/?product=001';
+  app.render();
+  app.window.location.href='https://shop.example/';
+  app.render();
+  assert.equal(app.node('#homeShop').hidden,true);
+});
+test('full catalogue is suppressed on home; floating strip and retired retail handlers are removed', () => {
+  assert.match(css,/body:not\(\.shop-browsing\):not\(\.product-view\) #main\{display:none\}/);
+  assert.match(inline,/\$\('#grid'\)\.innerHTML=''; \$\('#moreWrap'\)\.hidden=true; return;/);
+  assert.doesNotMatch(html,/offerbar|offerBar|obBarTxt|obBarCta|renderOfferBar|rtShop|rtDeals/);
+  assert.match(html,/<nav class="bottom" id="bottomNav"/);
+  assert.match(html,/class="offer-ui" hidden inert/);
+  assert.match(html,/\.tab\.pharmacy-tab\{font-size:16px;font-weight:750;color:var\(--green\)\}/);
+  assert.match(html,/<script src="\/assets\/product-detail\.js\?v=[^"]+"><\/script>/);
+  assert.doesNotMatch(source,/productImageMarkup|fresh-produce\.jpg/);
 });

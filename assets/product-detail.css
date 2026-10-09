@@ -1,5 +1,5 @@
 /* Xana's shop-sign typography and green, in an editorial product layout. */
-body.product-view .leads,body.product-view .offers,body.product-view .bulk,body.product-view .capture,body.product-view .offerbar,body.product-view #main > :not(#productDetail){display:none!important}
+body.product-view .leads,body.product-view .offers,body.product-view .bulk,body.product-view .capture,body.product-view #main > :not(#productDetail){display:none!important}
 body.product-view{padding-bottom:78px}
 #productDetail{padding:24px 0 48px;scroll-margin-top:180px}
 .pd-breadcrumbs{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:13px;color:var(--muted);margin-bottom:24px}

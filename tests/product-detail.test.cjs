@@ -96,6 +96,33 @@ test('browse pushes once; popstate restores detail without pushing another entry
   assert.match(app.node('#productDetail').innerHTML, /&lt;Unsafe&gt;/);
   assert.equal(app.pushes.length, 1);
 });
+test('PDP return restores its home or All/All browsing origin without changing basket or safety state', () => {
+  const home = require('../assets/home-catalogue.js');
+  for (const browsing of [false,true]) {
+    const app = page();
+    Object.assign(app.context.state,{
+      browsing,div:'All',cat:'All',q:'',sort:'rec',max:Infinity,
+      inStock:false,brands:new Set(),age:true,cart:{'A&B':2},
+    });
+    let isHome;
+    app.window.XanaHomeCatalogue=home;
+    app.window.XanaHome={render(){
+      isHome=home.isHome(app.context.state,new URL(app.location.href).searchParams.get('product'));
+    }};
+    app.window.XanaProductDetail.browse(true);
+    assert.equal(isHome,!browsing);
+    assert.equal(app.node(browsing ? '#catTitle' : '#homeTitle').focused,true);
+    assert.equal(app.context.state.browsing,browsing);
+    assert.equal(app.context.state.age,true);
+    assert.equal(app.context.state.cart['A&B'],2);
+    app.location.href='https://shop.example/?product=A%26B';
+    app.events.popstate();
+    assert.equal(isHome,false);
+    app.location.href='https://shop.example/';
+    app.events.popstate();
+    assert.equal(isHome,!browsing);
+  }
+});
 test('typing a quantity leaves the Add button intact so the first click works', () => {
   const app = page();
   const before = app.node('#productDetail').innerHTML;

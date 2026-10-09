@@ -41,7 +41,10 @@
     quantity = 1;
     render();
     if (id !== null) focusHeading();
-    else if (focusBrowse) document.querySelector('#catTitle').focus({ preventScroll: true });
+    else if (focusBrowse) {
+      const home = scope.XanaHomeCatalogue?.isHome(state);
+      document.querySelector(home ? '#homeTitle' : '#catTitle').focus({ preventScroll: true });
+    }
   }
   function browse(focusBrowse = false) { if (selected !== null) navigate(null, true, focusBrowse); }
   function render() {
