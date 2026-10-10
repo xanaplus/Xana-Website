@@ -83,7 +83,7 @@ test('reload/deep link renders loading, retryable error, not-found and escaped f
   assert.match(ready, /&lt;Unsafe&gt;/);
   assert.ok(!/Item number|<dt>Department|<dt>Category/.test(ready));
   assert.ok(!ready.includes('<Unsafe>'));
-  assert.match(ready, /Checkout is disabled/);
+  assert.ok(!/Checkout is disabled/.test(ready));
 });
 test('browse pushes once; popstate restores detail without pushing another entry', () => {
   const app = page();
