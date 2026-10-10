@@ -116,3 +116,17 @@ test('quantity pricing never clears Rx or age restrictions on a Wholesale shelf'
     assert.equal(p.age, !!overrides.age_restricted);
   }
 });
+
+test('BC price_tiers from the shared catalogue become quantity prices in the unit BC states', () => {
+  const tier = (minQty, unitPrice, extra) => ({ uom: 'PC', minQty, unitPrice, startsOn: null, endsOn: null, ...extra });
+  const p = product(item({ price_tiers: [tier(12, 160), tier(6, 180)] }));
+  assert.deepEqual(p.divisions, ['Retail', 'Wholesale']);
+  assert.deepEqual(p.tiers.map(t => [t.min, t.p, t.l]), [[1, 200, '1–5 PC'], [6, 180, '6–11 PC'], [12, 160, '12+ PC']]);
+  assert.equal(rules.unitPrice(p, 6), 180);
+  // Not real discounts, expired or ambiguous tiers never create a wholesale price.
+  for (const price_tiers of [
+    [tier(6, 200)], [tier(6, 210)], [tier(1, 150)], [tier(6, 180, { endsOn: '2020-01-01' })],
+    [tier(6, 180, { startsOn: '2999-01-01' })], [tier(6, 180), tier(12, 170, { uom: 'BOX' })], [],
+  ]) assert.equal(product(item({ price_tiers })).tiers, undefined);
+  assert.throws(() => product(item({ price_tiers: 'six' })), /wholesale tiers/);
+});

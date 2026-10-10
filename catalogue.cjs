@@ -11,6 +11,8 @@ const COLUMNS = 'item_no,name,price,stock,category,item_category_code,requires_r
 const OPTIONAL_GROUPS = {
   classification: ['website_division', 'website_category', 'wholesale_tiers'],
   sellingUnits: ['selling_unit', 'selling_unit_label', 'unit_conversions'],
+  // Xana Plus App publishes BC sales-price tiers under this name, each with its own BC unit.
+  priceTiers: ['price_tiers'],
 };
 const { classify, quantityTiers } = require('./classification.cjs');
 const { sellingUnit, wholeStock } = require('./selling-units.cjs');
@@ -65,6 +67,32 @@ function publicKey() {
   throw new Error('Catalogue requires a publishable/anon key');
 }
 
+// BC sales-price tiers as published by Xana Plus App: [{ minQty, unitPrice, uom,
+// startsOn, endsOn }]. Only real quantity discounts are kept: expired or future
+// prices, a minimum below 2, and prices that are not below the standard price
+// are not wholesale tiers. Tiers that mix units are ambiguous and are ignored.
+function bcPriceTiers(value, basePrice, today = new Date().toISOString().slice(0, 10)) {
+  if (value == null) return null;
+  if (!Array.isArray(value)) throw new Error('Catalogue contains invalid wholesale tiers');
+  const live = value.filter(tier => {
+    if (!tier || typeof tier !== 'object') throw new Error('Catalogue contains invalid wholesale tiers');
+    const day = v => (typeof v === 'string' && v ? v.slice(0, 10) : null);
+    const start = day(tier.startsOn);
+    const end = day(tier.endsOn);
+    return Number.isSafeInteger(tier.minQty) && tier.minQty >= 2 && typeof tier.unitPrice === 'number'
+      && tier.unitPrice > 0 && tier.unitPrice < basePrice && (!start || start <= today) && (!end || end >= today);
+  });
+  const units = new Set(live.map(tier => typeof tier.uom === 'string' ? tier.uom.trim().toUpperCase() : ''));
+  if (!live.length || units.size !== 1 || units.has('')) return null;
+  const kept = [];
+  for (const tier of [...live].sort((a, b) => a.minQty - b.minQty || a.unitPrice - b.unitPrice)) {
+    const last = kept[kept.length - 1];
+    if (last && (last.min_quantity === tier.minQty || tier.unitPrice > last.unit_price)) continue;
+    kept.push({ min_quantity: tier.minQty, unit_price: tier.unitPrice });
+  }
+  return { tiers: kept, uom: [...units][0] };
+}
+
 function product(row) {
   if (typeof row.item_no !== 'string' || !row.item_no.trim()) return null;
   const name = (row.name || row.item_no).trim();
@@ -72,9 +100,11 @@ function product(row) {
   if (!Number.isFinite(price) || price <= 0) return null;
   const { div, group, rx, age, declared } = classify(row, name);
   const unit = sellingUnit(row);
-  const tiers = quantityTiers(row.wholesale_tiers, price, unit?.label);
-  // A quantity price is ambiguous unless its selling unit is published too.
-  if (tiers && !unit) throw new Error('Catalogue quantity prices require a selling unit');
+  const bc = row.wholesale_tiers == null ? bcPriceTiers(row.price_tiers, price) : null;
+  const tiers = quantityTiers(row.wholesale_tiers ?? bc?.tiers, price, unit?.label ?? bc?.uom);
+  // A quantity price is ambiguous unless its unit is published too: either the
+  // item's selling unit or the unit BC states on the price tier itself.
+  if (tiers && !unit && !bc) throw new Error('Catalogue quantity prices require a selling unit');
 
   let cat = categoryNames[group] || 'Other';
   if (div === 'Deli') cat = group === 'MEAT PRODUCTS' ? 'Meat & deli' : 'Prepared foods';
