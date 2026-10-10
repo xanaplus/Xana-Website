@@ -81,7 +81,7 @@ test('reload/deep link renders loading, retryable error, not-found and escaped f
   assert.match(page('ready', []).node('#productDetail').innerHTML, /Product not found/);
   const ready = page().node('#productDetail').innerHTML;
   assert.match(ready, /&lt;Unsafe&gt;/);
-  assert.match(ready, /Item number/);
+  assert.ok(!/Item number|<dt>Department|<dt>Category/.test(ready));
   assert.ok(!ready.includes('<Unsafe>'));
   assert.match(ready, /Checkout is disabled/);
 });

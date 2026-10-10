@@ -120,6 +120,6 @@ test('storefront shows selling units on cards, details and basket, never name-de
   assert.match(boxed, /5 box in stock/);
   assert.match(boxed, /Quantity to add \(box\)/);
   const unknown = render(product(item()));
-  assert.match(unknown, /Not yet published by Business Central/);
+  assert.ok(!/Not yet published by Business Central|<dt>Selling unit/.test(unknown));
   assert.ok(!/24 Pcs<\/p>|Pack<\/dt>/.test(unknown));
 });
